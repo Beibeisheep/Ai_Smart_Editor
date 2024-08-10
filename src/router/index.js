@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/user/account/LoginView.vue'
 import RegisterView from '../views/user/account/RegisterView.vue'
 import HomeView from '../views/home/HomeView.vue'
@@ -34,7 +33,7 @@ const routes = [
 		name: 'RegisterView'
 	},
 	{
-		path: '/home/editor',
+		path: '/home/Home',
 		component: HomeView,
 		name: 'HomeView',
 		meta: {
@@ -58,4 +57,3 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
-
