@@ -2,7 +2,7 @@
   <div>
     <div>
       <!-- 点击展示客服弹窗 -->
-      <div class="service" @click="showModal">
+      <div class="service" @click="showOptions">
         <svg
           t="1686814946576"
           class="icon"
@@ -41,10 +41,25 @@
         </svg>
       </div>
       <!-- 弹窗 -->
-      <div v-if="visible" class="modal">
+      <div v-if="showOptionsModal" class="modal">
         <div class="modal-header">
-          <span class="modal-title">SERVICE</span>
-          <span class="close-btn" @click="visible = false">×</span>
+          <span class="modal-title">服务</span>
+          <span class="close-btn" @click="showOptionsModal = false">×</span>
+        </div>
+        <div class="modal-body">
+          <div class="option-list">
+            <div class="option-item" @click="openAiCustomerService">AI 客服</div>
+            <div class="option-item">一键排版</div>
+            <div class="option-item">差错修错</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI 客服聊天界面 -->
+      <div v-if="showChat" class="chat-modal">
+        <div class="modal-header">
+          <span class="modal-title">AI 客服</span>
+          <span class="close-btn" @click="showChat = false">×</span>
         </div>
         <div class="modal-body">
           <div class="kefubox">
@@ -149,7 +164,8 @@ import { v4 as uuidv4 } from 'uuid';
 export default {
   data() {
     return {
-      visible: false,
+      showOptionsModal: false,
+      showChat: false, // 控制 AI 客服聊天界面的显示
       userInput: '',
       chatHistory: [],
       // 控制请求频率
@@ -158,8 +174,12 @@ export default {
     };
   },
   methods: {
-    showModal() {
-      this.visible = true;
+    showOptions() {
+      this.showOptionsModal = true;
+    },
+    openAiCustomerService() {
+      this.showChat = true;
+      this.showOptionsModal = false;
     },
     async sendMessage() {
       if (!this.userInput.trim()) return;
@@ -335,5 +355,18 @@ export default {
   margin-right: 10px;
   display: flex;
   align-items: center;
+}
+
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-item {
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>

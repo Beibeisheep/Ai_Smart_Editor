@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/user/account/LoginView.vue'
 import RegisterView from '../views/user/account/RegisterView.vue'
 import HomeView from '../views/home/HomeView.vue'
+import EditView from '../views/home/edit/EditView.vue'
 import store from '@/stores'
 // const router = createRouter({
 //   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,7 +38,15 @@ const routes = [
 		component: HomeView,
 		name: 'HomeView',
 		meta: {
-			Auth: true //需要授权才能登录
+			Auth: true // 需要授权才能登录
+		}
+	},
+	{
+		path: '/home/edit',
+		component: EditView,
+		name: 'EditView',
+		meta: {
+			Auth: true //我不知道需不需要必须登陆后才能访问
 		}
 	}
 ]
