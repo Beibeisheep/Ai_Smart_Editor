@@ -50,7 +50,7 @@
           <div class="option-list">
             <div class="option-item" @click="openAiCustomerService">AI 客服</div>
             <div class="option-item">一键排版</div>
-            <div class="option-item">差错修错</div>
+            <div class="option-item">查错修错</div>
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@
       <div v-if="showChat" class="chat-modal">
         <div class="modal-header">
           <span class="modal-title">AI 客服</span>
-          <span class="close-btn" @click="showChat = false">×</span>
+          <span class="close-btn" @click="closeChat">×</span>
         </div>
         <div class="modal-body">
           <div class="kefubox">
@@ -176,10 +176,16 @@ export default {
   methods: {
     showOptions() {
       this.showOptionsModal = true;
+      console.log("打开选择弹窗cccccccccccccc")
     },
     openAiCustomerService() {
-      this.showChat = true;
+      console.log("关闭选择弹窗发；；；；；；；；；；；；；；；")
       this.showOptionsModal = false;
+      console.log("打开AI客服fffffffffffffffff")
+      this.showChat = true;
+    },
+    closeChat() {
+      this.showChat = false;
     },
     async sendMessage() {
       if (!this.userInput.trim()) return;
@@ -248,14 +254,15 @@ export default {
   justify-content: center;
   align-items: center;
   position: fixed;
-  bottom: 200px;
-  right: 100px;
+  bottom: 50px; /* 靠近页面底部 */
+  right: 50px; /* 靠近页面右侧 */
   background-color: #004dff;
   width: 60px;
   height: 60px;
   border-radius: 50%;
   padding: 5px;
   box-shadow: 4px 10px 10px -7px black;
+  cursor: pointer;
 }
 
 .modal {
@@ -266,9 +273,11 @@ export default {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  width: 500px;
-  height: 500px;
+  width: 600px;
+  height: 600px;
   z-index: 1000;
+  max-height: 90vh; /* 确保模态框不会超过视窗高度 */
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .modal-header {
@@ -277,13 +286,13 @@ export default {
   align-items: center;
   background-color: #004dff;
   color: #fff;
-  padding: 10px 15px;
+  padding: 15px 20px; /* 增加内边距 */
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 }
 
 .modal-title {
-  font-size: 1.2rem;
+  font-size: 1.5rem; /* 增大字体 */
   font-weight: bold;
 }
 
@@ -293,11 +302,12 @@ export default {
 }
 
 .modal-body {
-  padding: 15px;
+  padding: 20px; /* 增加内边距 */
+  overflow-y: auto; /* 增加滚动支持 */
 }
 
 .modal-footer {
-  padding: 10px 15px;
+  padding: 15px 20px; /* 增加内边距 */
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   display: flex;
@@ -306,24 +316,24 @@ export default {
 
 .iptbox {
   display: flex;
-  /* justify-content: center; */
   align-items: center;
   position: relative;
 }
 
 .iptbox input {
-  width: 490px;
+  width: 85%; /* 使用百分比宽度 */
   height: 40px;
-  padding-left: 5px;
-  padding-right: 70px;
+  padding-left: 10px; /* 增加内边距 */
+  padding-right: 70px; /* 增加内边距 */
   border-radius: 10px;
+  border: 1px solid #ccc; /* 添加边框 */
 }
 
 .iptbox button {
   width: 60px;
-  height: 30px;
+  height: 35px;
   position: absolute;
-  right: 3px;
+  right: 5px; /* 增加位置调整 */
   top: 5px;
   border-radius: 10px;
   border: none;
@@ -332,27 +342,43 @@ export default {
   font-weight: 600;
 }
 
+.chat-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 500px;
+  background: #fff; /* Adjust as needed */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+
 .bot-message,
 .user-message {
   display: flex;
   align-items: center;
+  margin-bottom: 10px; /* 增加底部间距 */
 }
 
 .bot-message {
-  background-color: #888a9f;
-  color: #000000;
+  background-color: #e0e0e0; /* 修改背景色 */
+  color: #000;
   border-radius: 10px;
+  padding: 10px 15px; /* 增加内边距 */
 }
 
 .user-message {
-  background-color: #6f717e;
-  color: #000000;
-  padding: 5px 10px;
+  background-color: #d1d1d1; /* 修改背景色 */
+  color: #000;
+  padding: 10px 15px; /* 增加内边距 */
   border-radius: 10px;
 }
 
 .userBox {
-  margin-right: 10px;
+  margin-right: 15px; /* 增加右间距 */
   display: flex;
   align-items: center;
 }

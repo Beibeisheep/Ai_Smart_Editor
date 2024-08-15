@@ -12,6 +12,8 @@
 <script>
 import { defineComponent, ref, computed } from 'vue'
 import { NButton, NMenu } from 'naive-ui'
+import EditView from './edit/EditView.vue';
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
 	components: {
@@ -45,6 +47,8 @@ export default defineComponent({
 		const createFile = () => {
 			console.log('创建了一个文件')
 
+			const router = useRouter() // 需要使用 router
+			router.push('/home/edit') // 导航到编辑页面
 			// 这里可以添加展示通知的逻辑
 			// nNotification.info({
 			// 	title: '通知',
