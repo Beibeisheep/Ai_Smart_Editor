@@ -2,7 +2,7 @@
 	<div class="layout">
 		<SideBar></SideBar>
 		<div class="box">
-			<h1>回收站</h1>
+			<delete-table></delete-table>
 		</div>
 	</div>
 </template>
@@ -11,9 +11,11 @@
 import { defineComponent, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SideBar from '@/components/SideBar.vue'
+import DeleteTable from '@/components/DeleteTable.vue'
 export default defineComponent({
 	components: {
-		SideBar
+		SideBar,
+		DeleteTable
 	},
 	setup() {
 		const router = useRouter()

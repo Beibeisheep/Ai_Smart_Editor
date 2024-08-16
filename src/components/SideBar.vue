@@ -36,6 +36,18 @@ export default defineComponent({
 
 		const createFile = () => {
 			console.log('创建了一个文件')
+			$.ajax({
+				url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
+				// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
+				type: 'POST',
+				success: function (response) {
+					console.log('文件创建成功:', response)
+					// 处理成功后的逻辑，例如更新文件列表
+				},
+				error: function (error) {
+					console.error('文件创建失败:', error)
+				}
+			})
 			router.push('/home/edit')
 		}
 

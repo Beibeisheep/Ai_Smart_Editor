@@ -119,6 +119,7 @@ const goHome = () => {
 const addNewItem = () => {
 	$.ajax({
 		url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
+		// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
 		type: 'POST',
 		success: function (response) {
 			console.log('文件创建成功:', response)

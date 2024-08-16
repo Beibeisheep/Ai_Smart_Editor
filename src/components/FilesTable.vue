@@ -1,46 +1,267 @@
 <template>
-	<div>
-		<table class="files-table">
-			<thead>
-				<tr>
-					<th>文件名</th>
-					<th>创建者</th>
-					<th>打开时间</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr v-for="(item, index) in tableData" :key="index">
-					<td>{{ item.filename }}</td>
-					<td>{{ item.creator }}</td>
-					<td>{{ item.openTime }}</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+	<n-space vertical>
+		<n-data-table :columns="columns" :data="tableData" :loading="loading" />
+
+		<!-- 重命名对话框 -->
+		<n-dialog class="rename" v-show="renameDialogVisible" title="重命名" :style="dialogStyle">
+			<div class="dialog-content">
+				<input type="text" v-model="newFileName" placeholder="输入新的文件名" :style="inputStyle" />
+			</div>
+			<div class="dialog-footer">
+				<n-space size="large">
+					<n-button @click="handleRenameConfirm" type="primary">确定</n-button>
+					<n-button @click="handleRenameCancel">取消</n-button>
+				</n-space>
+			</div>
+		</n-dialog>
+
+		<!-- 删除确认对话框 -->
+		<n-dialog
+			class="delete"
+			v-show="deleteDialogVisible"
+			title="确认删除"
+			:style="dialogStyle"
+			type="warning"
+		>
+			<div class="dialog-content">
+				<p>确认删除吗？</p>
+			</div>
+			<div class="dialog-footer">
+				<n-space size="large">
+					<n-button @click="handleDeleteConfirm" type="warning">删除</n-button>
+					<n-button @click="handleDeleteCancel">取消</n-button>
+				</n-space>
+			</div>
+		</n-dialog>
+	</n-space>
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, h } from 'vue'
+import { NDataTable, NSpace, NPopover, NButton, NDialog, NInput } from 'naive-ui'
+import { Icon } from '@iconify/vue'
 import $ from 'jquery'
 
 export default defineComponent({
+	components: {
+		NDataTable,
+		NSpace,
+		NPopover,
+		NButton,
+		NDialog,
+		NInput
+	},
 	setup() {
 		const tableData = ref([])
 		const loading = ref(true)
+		const renameDialogVisible = ref(false)
+		const deleteDialogVisible = ref(false)
+		const selectedFile = ref(null)
+		const newFileName = ref('')
 
+		// 对话框样式
+		const dialogStyle = {
+			width: '300px',
+			height: 'auto',
+			display: 'flex',
+			flexDirection: 'column',
+			justifyContent: 'space-between'
+		}
+		const inputStyle = {
+			border: '1px solid #dcdcdc',
+			borderRadius: '4px',
+			padding: '8px',
+			fontSize: '14px',
+			width: '100%',
+			boxSizing: 'border-box'
+		}
+		const columns = [
+			{
+				title: '文件名',
+				key: 'fileName',
+				align: 'center',
+				render: (row) =>
+					h(
+						NPopover,
+						{
+							trigger: 'click',
+							placement: 'bottom',
+							showArrow: true,
+							vModel: (val) => {
+								row.popoverVisible = val
+							}
+						},
+						{
+							trigger: () =>
+								h(
+									'span',
+									{
+										class: 'file-name',
+										style:
+											'margin-right: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;',
+										onClick: () => handleFileClick(row)
+									},
+									row.fileName
+								),
+							default: () =>
+								h(NSpace, { vertical: true }, [
+									h(NButton, { size: 'small', text: 'true', onClick: handleRename }, () => [
+										h(Icon, { icon: 'ic:outline-drive-file-rename-outline' }),
+										'重命名'
+									]),
+									h(NButton, { size: 'small', text: 'true', onClick: handleDelete }, () => [
+										h(Icon, { icon: 'material-symbols:delete-sharp' }),
+										'删除文件'
+									])
+								])
+						}
+					)
+			},
+
+			{
+				title: '创建时间',
+				key: 'fileCreateTime',
+				align: 'center',
+				render: (row) => formatDate(row.fileCreateTime)
+			},
+			{
+				title: '最近更新时间',
+				key: 'fileUpdateTime',
+				align: 'center',
+				render: (row) => formatDate(row.fileUpdateTime)
+			}
+		]
+
+		const handleFileClick = (file) => {
+			selectedFile.value = file
+		}
+
+		// 获取数据
 		const fetchData = () => {
 			$.ajax({
-				url: 'http://10.6.3.167:8083/api/files',
-				type: 'GET',
-				success: (data) => {
-					tableData.value = data
+				url: 'http://192.168.0.129:8083/TextEditor/user/listFiles',
+				type: 'POST',
+				dataType: 'json',
+				success: (response) => {
+					if (response.code === 200) {
+						tableData.value = response.data
+					} else {
+						console.error('获取数据时出错:', response.message)
+					}
 					loading.value = false
 				},
 				error: (xhr, status, error) => {
-					console.error('Error fetching data:', error)
+					console.error('获取数据时出错:', {
+						xhr,
+						status,
+						error
+					})
 					loading.value = false
 				}
 			})
+		}
+
+		// 时间格式化函数
+		const formatDate = (dateString) => {
+			const options = {
+				year: 'numeric',
+				month: '2-digit',
+				day: '2-digit',
+				hour: '2-digit',
+				minute: '2-digit',
+				second: '2-digit',
+				timeZone: 'UTC',
+				timeZoneName: 'short'
+			}
+			const date = new Date(dateString)
+			return date.toLocaleString(undefined, options).replace(',', '')
+		}
+
+		// 显示重命名对话框
+		const handleRename = () => {
+			renameDialogVisible.value = true
+			newFileName.value = selectedFile.value ? selectedFile.value.fileName : ''
+		}
+
+		// 确认重命名操作
+		const handleRenameConfirm = () => {
+			if (!newFileName.value.trim()) {
+				alert('文件名不能为空')
+				return
+			}
+
+			$.ajax({
+				url: 'http://192.168.0.129:8083/TextEditor/user/updateFileName',
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify({
+					fileId: selectedFile.value.fileId,
+					fileName: newFileName.value
+				}),
+				dataType: 'json',
+				success: (response) => {
+					if (response.code === 200) {
+						fetchData()
+						renameDialogVisible.value = false
+						newFileName.value = ''
+					} else {
+						console.error('重命名失败:', response.message)
+					}
+				},
+				error: (xhr, status, error) => {
+					console.error('重命名时出错:', {
+						xhr,
+						status,
+						error
+					})
+				}
+			})
+		}
+
+		// 取消重命名操作
+		const handleRenameCancel = () => {
+			renameDialogVisible.value = false
+			newFileName.value = ''
+		}
+
+		// 显示删除确认对话框
+		const handleDelete = () => {
+			deleteDialogVisible.value = true
+		}
+
+		// 确认删除操作
+		const handleDeleteConfirm = () => {
+			if (!selectedFile.value) return
+
+			$.ajax({
+				url: 'http://192.168.0.129:8083/TextEditor/user/removeFile',
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify(selectedFile.value.fileId),
+				dataType: 'json',
+				success: (response) => {
+					if (response.code === 200) {
+						fetchData()
+						deleteDialogVisible.value = false
+						selectedFile.value = null
+					} else {
+						console.error('删除失败:', response.message)
+					}
+				},
+				error: (xhr, status, error) => {
+					console.error('删除时出错:', {
+						xhr,
+						status,
+						error
+					})
+				}
+			})
+		}
+
+		// 取消删除操作
+		const handleDeleteCancel = () => {
+			deleteDialogVisible.value = false
+			selectedFile.value = null
 		}
 
 		onMounted(() => {
@@ -49,26 +270,64 @@ export default defineComponent({
 
 		return {
 			tableData,
-			loading
+			loading,
+			columns,
+			renameDialogVisible,
+			deleteDialogVisible,
+			selectedFile,
+			newFileName,
+			handleFileClick,
+			handleRename,
+			handleRenameConfirm,
+			handleRenameCancel,
+			handleDelete,
+			handleDeleteConfirm,
+			handleDeleteCancel,
+			dialogStyle,
+			inputStyle
 		}
 	}
 })
 </script>
 
 <style scoped>
-.files-table {
-	width: 100%;
-	border-collapse: collapse;
+.file-name {
+	cursor: default;
 }
 
-.files-table th,
-.files-table td {
-	border: 1px solid #f4f4f4;
-	padding: 8px;
-	color: #000; /* 设置表头和单元格的文字颜色为黑色 */
+.file-name:hover {
+	cursor: pointer;
+	text-decoration: underline;
+	color: #007bff;
 }
 
-.files-table th {
-	background-color: #f4f4f4;
+.rename.dialog-button {
+	margin-left: 5px;
+}
+
+.rename.dialog-content {
+	margin-bottom: 16px;
+}
+
+.rename.dialog-footer {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.delete.dialog-button {
+	margin-left: 5px;
+}
+
+.delete.dialog-content {
+	margin-bottom: 16px;
+}
+
+.delete.dialog-footer {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.dialog-button:last-child {
+	margin-right: 0;
 }
 </style>
