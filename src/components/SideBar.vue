@@ -1,0 +1,95 @@
+<template>
+	<div class="sidebar">
+		<div class="btn">
+			<n-button @click="createFile" type="submit" class="btn btn-primary">创建</n-button>
+		</div>
+		<n-menu :options="menuOptions" :value="selectedKey" @update:value="handleMenuClick" />
+	</div>
+</template>
+
+<script>
+import { defineComponent, ref, computed } from 'vue'
+import { NButton, NMenu } from 'naive-ui'
+import { useRouter } from 'vue-router'
+
+export default defineComponent({
+	components: {
+		NMenu,
+		NButton
+	},
+	setup() {
+		const router = useRouter()
+		const selectedKey = ref('')
+
+		const menuItems = ref([
+			{ label: '最近文件', path: '/recent-files' },
+			{ label: '回收站', path: '/recycle-bin' }
+		])
+
+		const menuOptions = computed(() =>
+			menuItems.value.map((item) => ({
+				label: item.label,
+				key: item.path,
+				path: item.path
+			}))
+		)
+
+		const createFile = () => {
+			console.log('创建了一个文件')
+			router.push('/home/edit')
+		}
+
+		const handleMenuClick = (key) => {
+			const item = menuItems.value.find((menuItem) => menuItem.path === key)
+			if (item) {
+				console.log('点击了菜单项：', item.label)
+				router.push(item.path)
+				selectedKey.value = key // 更新选中的菜单项
+			}
+		}
+
+		return {
+			menuOptions,
+			handleMenuClick,
+			createFile,
+			selectedKey
+		}
+	}
+})
+</script>
+
+<style scoped>
+.sidebar {
+	width: 200px;
+	height: calc(100vh - 10vh);
+	background-color: #f5f5f5;
+	padding: 1rem;
+	position: fixed;
+	top: 10vh;
+	left: 0;
+	box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+div.btn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 30px;
+}
+
+.btn-primary {
+	width: 100%;
+	padding: 10px;
+	font-size: 18px;
+	background-color: #354c6e !important;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+	background-color: #1e314d !important;
+}
+</style>

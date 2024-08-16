@@ -25,7 +25,8 @@ export default {
 		login(context, data) {
 			// 通过账号密码登录
 			$.ajax({
-				url: 'http://10.6.3.167:8083/TextEditor/user/login',
+				// url: 'http://10.6.3.167:8083/TextEditor/user/login',
+				url: 'http://192.168.0.129:8083/TextEditor/user/login',
 				type: 'post',
 				headers: {
 					'Content-Type': 'application/json'

@@ -3,6 +3,8 @@ import LoginView from '../views/user/account/LoginView.vue'
 import RegisterView from '../views/user/account/RegisterView.vue'
 import HomeView from '../views/home/HomeView.vue'
 import EditView from '../views/home/edit/EditView.vue'
+import RecentFiles from '../views/menu/RecentFiles.vue'
+import RecycleBin from '../views/menu/RecycleBin.vue'
 import store from '@/stores'
 // const router = createRouter({
 //   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,6 +25,16 @@ import store from '@/stores'
 //   ]
 // })
 const routes = [
+	{
+		path: '/recent-files',
+		name: 'RecentFiles',
+		component: RecentFiles
+	},
+	{
+		path: '/recycle-bin',
+		name: 'RecycleBin',
+		component: RecycleBin
+	},
 	{
 		path: '/user/account/login/',
 		component: LoginView,

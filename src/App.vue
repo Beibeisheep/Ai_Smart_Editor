@@ -7,28 +7,31 @@
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AiText from './components/AiText.vue'
+import NavBar from './components/NavBar.vue'
+
+// 获取当前路由信息
+const route = useRoute()
+
+// 定义需要隐藏 NavBar 的路径
+const hideNavBarPaths = ['/home/edit']
+
+// 判断当前路径是否应该隐藏 NavBar
+const ShowNavBar = computed(() => {
+	return !hideNavBarPaths.includes(route.path)
+})
 </script>
 
 <template>
-	<!-- <header>
-		<img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-		<div class="wrapper">
-			<HelloWorld msg="You did it!" />
-			<NavBar />
-			<router-view></router-view>
-		</div>
-	</header> -->
 	<div>
-		<NavBar />
+		<!-- 仅在 ShowNavBar 为 true 时渲染 NavBar -->
+		<NavBar v-if="ShowNavBar" />
 		<router-view></router-view>
 		<!-- 测试的ai窗口 -->
 		<AiText />
 	</div>
-	<!-- <RouterView /> -->
 </template>
 
 <script>
