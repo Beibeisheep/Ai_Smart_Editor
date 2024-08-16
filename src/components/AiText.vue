@@ -392,5 +392,6 @@ export default {
 	padding: 10px;
 	border-radius: 5px;
 	cursor: pointer;
+	color: #000; /* 设置文本颜色 */
 }
 </style>

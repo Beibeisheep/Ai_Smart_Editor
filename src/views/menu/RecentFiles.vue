@@ -2,7 +2,7 @@
 	<div class="layout">
 		<SideBar></SideBar>
 		<div class="box">
-			<h1>最近文件</h1>
+			<files-table></files-table>
 		</div>
 	</div>
 </template>
@@ -11,9 +11,11 @@
 import { defineComponent, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SideBar from '@/components/SideBar.vue'
+import FilesTable from '@/components/FilesTable.vue'
 export default defineComponent({
 	components: {
-		SideBar
+		SideBar,
+		FilesTable
 	},
 	setup() {
 		const router = useRouter()

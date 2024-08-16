@@ -117,7 +117,17 @@ const goHome = () => {
 }
 
 const addNewItem = () => {
-	console.log('添加新项目的逻辑可以在这里实现')
+	$.ajax({
+		url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
+		type: 'POST',
+		success: function (response) {
+			console.log('文件创建成功:', response)
+			// 处理成功后的逻辑，例如更新文件列表
+		},
+		error: function (error) {
+			console.error('文件创建失败:', error)
+		}
+	})
 }
 
 onMounted(() => {
