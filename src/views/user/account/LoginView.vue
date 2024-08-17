@@ -115,7 +115,7 @@ export default {
 				email: email.value,
 				password: password.value,
 				success() {
-					router.push({ name: 'HomeView' })
+					router.push('/recent-files')
 				},
 				error(msg) {
 					error_message.value = msg

@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, ref, computed, watch } from 'vue'
 import { NButton, NMenu } from 'naive-ui'
 import { useRouter } from 'vue-router'
 
@@ -19,7 +19,7 @@ export default defineComponent({
 	},
 	setup() {
 		const router = useRouter()
-		const selectedKey = ref('')
+		const selectedKey = ref('最近文件')
 
 		const menuItems = ref([
 			{ label: '最近文件', path: '/recent-files' },
@@ -80,6 +80,13 @@ export default defineComponent({
 				selectedKey.value = key // 更新选中的菜单项
 			}
 		}
+		// 监听路由变化并更新 selectedKey
+		watch(
+			() => router.path,
+			(newPath) => {
+				selectedKey.value = newPath
+			}
+		)
 
 		return {
 			menuOptions,

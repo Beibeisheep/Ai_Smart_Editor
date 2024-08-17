@@ -2,7 +2,25 @@
 	<div class="container">
 		<!-- 顶部导航栏 -->
 		<div class="navbar">
-			<div><h2>最近文件</h2></div>
+			<h2 class="recent-files-title">最近文件</h2>
+			<input
+				placeholder="搜索文件"
+				class="search-input"
+				v-model="searchQuery"
+				@input="searchFiles"
+				style="
+					margin-left: 10px;
+					opacity: 0.7;
+					width: 200px;
+					height: 36px;
+					border: 1px solid black;
+					border-radius: 3px;
+					margin-right: 3px;
+				"
+			/>
+			<n-button @click="addNewItem" type="primary">
+				<Icon icon="teenyicons:add-solid" />
+			</n-button>
 		</div>
 		<n-space vertical class="table-container">
 			<n-data-table :columns="columns" :data="tableData" :loading="loading" />
@@ -61,7 +79,8 @@ export default defineComponent({
 		NPopover,
 		NButton,
 		NDialog,
-		NInput
+		NInput,
+		Icon
 	},
 	setup() {
 		const router = useRouter()
@@ -71,14 +90,16 @@ export default defineComponent({
 		const deleteDialogVisible = ref(false)
 		const selectedFile = ref(null)
 		const newFileName = ref('')
+		const searchQuery = ref('') // 用于存储搜索框的值
 
-		// 对话框样式
 		const dialogStyle = {
-			width: '300px',
-			height: 'auto',
-			display: 'flex',
-			flexDirection: 'column',
-			justifyContent: 'space-between'
+			width: '300px', // 对话框宽度
+			top: '50%', // 垂直居中
+			left: '50%', // 水平居中
+			transform: 'translate(-50%, -50%)', // 用于居中对话框
+			position: 'fixed', // 保证对话框始终相对于页面定位
+			backgroundColor: 'white',
+			zIndex: 1000 // 保证对话框在所有内容之上
 		}
 		const inputStyle = {
 			border: '1px solid #dcdcdc',
@@ -86,6 +107,7 @@ export default defineComponent({
 			padding: '8px',
 			fontSize: '14px',
 			width: '100%',
+			height: '36px',
 			boxSizing: 'border-box'
 		}
 		const columns = [
@@ -134,7 +156,6 @@ export default defineComponent({
 						}
 					)
 			},
-
 			{
 				title: '创建时间',
 				key: 'fileCreateTime',
@@ -151,6 +172,49 @@ export default defineComponent({
 
 		const handleFileClick = (file) => {
 			selectedFile.value = file
+		}
+
+		//搜索文件
+		const searchFiles = () => {
+			if (searchQuery.value.trim() === '') {
+				fetchData() // 如果搜索框为空，则重新获取所有文件
+				return
+			}
+			$.ajax({
+				url: 'http://192.168.0.129:8083/TextEditor/user/listFileByName',
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify(searchQuery.value.trim()), // 传递搜索参数
+				success: function (response) {
+					if (response.code === 200) {
+						tableData.value = response.data.map((file) => ({
+							fileId: file.fileId,
+							fileName: file.fileName,
+							fileCreateTime: file.fileCreateTime,
+							fileUpdateTime: file.fileUpdateTime
+						}))
+					} else {
+						console.error('搜索文件时出错:', response.message)
+					}
+				},
+				error: function (error) {
+					console.error('搜索文件失败:', error)
+				}
+			})
+		}
+
+		const addNewItem = () => {
+			$.ajax({
+				url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
+				type: 'POST',
+				success: function (response) {
+					console.log('文件创建成功:', response)
+					fetchData() // 重新获取文件列表
+				},
+				error: function (error) {
+					console.error('文件创建失败:', error)
+				}
+			})
 		}
 
 		// 获取数据
@@ -191,7 +255,7 @@ export default defineComponent({
 				timeZoneName: 'short'
 			}
 			const date = new Date(dateString)
-			return date.toLocaleString(undefined, options).replace(',', '')
+			return date.toLocaleString('zh-CN', options)
 		}
 
 		// 显示重命名对话框
@@ -202,6 +266,8 @@ export default defineComponent({
 
 		// 确认重命名操作
 		const handleRenameConfirm = () => {
+			console.log('FIleName', newFileName.value)
+			console.log('searchQuery.value.trim()', newFileName.value.trim())
 			if (!newFileName.value.trim()) {
 				alert('文件名不能为空')
 				return
@@ -226,11 +292,7 @@ export default defineComponent({
 					}
 				},
 				error: (xhr, status, error) => {
-					console.error('重命名时出错:', {
-						xhr,
-						status,
-						error
-					})
+					console.error('重命名时出错:', { xhr, status, error })
 				}
 			})
 		}
@@ -281,10 +343,12 @@ export default defineComponent({
 			selectedFile.value = null
 		}
 
+		// 文件预览
 		const handlePreview = () => {
 			router.push('/home/edit')
 		}
 
+		// Mounted
 		onMounted(() => {
 			fetchData()
 		})
@@ -295,78 +359,73 @@ export default defineComponent({
 			columns,
 			renameDialogVisible,
 			deleteDialogVisible,
-			selectedFile,
-			newFileName,
-			handleFileClick,
-			handleRename,
+			dialogStyle,
+			inputStyle,
 			handleRenameConfirm,
 			handleRenameCancel,
-			handleDelete,
 			handleDeleteConfirm,
 			handleDeleteCancel,
-			dialogStyle,
-			inputStyle
+			addNewItem,
+			searchQuery,
+			newFileName,
+			searchFiles
 		}
 	}
 })
 </script>
 
 <style scoped>
-.navbar {
-	margin-top: 34px;
-	background-color: #f8f9fa; /* 背景色 */
-	padding: 16px; /* 内边距 */
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影 */
-	display: flex;
-	align-items: center;
-	border-bottom: 1px solid #e9ecef; /* 底部边框 */
-}
 .container {
 	display: flex;
 	flex-direction: column;
+	background-color: #f5f5f5;
 	height: 100%;
+	box-sizing: border-box;
 }
+.navbar {
+	margin-top: 34px;
+	background-color: #f8f9fa;
+	padding: 16px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	border-bottom: 1px solid #e9ecef;
+	display: flex;
+	align-items: center;
+}
+
 .table-container {
-	flex: 1; /* 使数据表格容器占据剩余空间 */
-	overflow: auto; /* 确保数据表格内容能滚动查看 */
-}
-.file-name {
-	cursor: default;
+	flex: 1;
+	overflow: auto;
 }
 
-.file-name:hover {
-	cursor: pointer;
-	text-decoration: underline;
-	color: #007bff;
+.recent-files-title {
+	padding: 0;
+	font-size: 24px;
+	color: #333;
+	font-weight: normal;
 }
 
-.rename.dialog-button {
-	margin-left: 5px;
+.search-bar {
+	display: flex;
+	align-items: center;
 }
 
-.rename.dialog-content {
-	margin-bottom: 16px;
+/* 确保移除输入框在聚焦时的黑色边框和阴影效果 */
+input:focus {
+	outline: none !important;
+	box-shadow: none !important;
 }
 
-.rename.dialog-footer {
+.rename,
+.delete {
+	width: 300px;
+}
+
+.dialog-content {
+	margin-bottom: 20px;
+}
+
+.dialog-footer {
 	display: flex;
 	justify-content: flex-end;
-}
-
-.delete.dialog-button {
-	margin-left: 5px;
-}
-
-.delete.dialog-content {
-	margin-bottom: 16px;
-}
-
-.delete.dialog-footer {
-	display: flex;
-	justify-content: flex-end;
-}
-
-.dialog-button:last-child {
-	margin-right: 0;
 }
 </style>

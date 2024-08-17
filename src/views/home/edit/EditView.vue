@@ -41,23 +41,28 @@
 					<div style="display: flex; align-items: center; margin-bottom: 20px">
 						<input
 							placeholder="搜索文件"
-							style="opacity: 0.7; flex: 1; margin-right: 10px"
+							style="
+								opacity: 0.7;
+								flex: 1;
+								margin-right: 10px;
+								height: 36px;
+								border: 1px solid black;
+								border-radius: 3px;
+							"
 							clearable
 							v-model="searchQuery"
 							@input="searchFiles"
 						/>
-						<n-button @click="addNewItem" type="primary">+</n-button>
+						<n-button @click="addNewItem" type="primary">
+							<Icon icon="teenyicons:add-solid" />
+						</n-button>
 					</div>
 					<n-collapse v-model:value="dropdownOpen">
 						<n-collapse-item name="files" :title="collapseTitle">
 							<div style="display: flex; flex-direction: column">
 								<template v-for="(subItem, subIndex) in fileItems" :key="subIndex">
-									<n-button
-										block
-										text
-										@click="selectFile(subItem.fileId)"
-										style="text-align: left; margin-bottom: 5px"
-									>
+									<n-button block text @click="selectFile(subItem.fileId)" class="file-button"
+										><Icon icon="ph:files-light" />
 										{{ subItem.fileName }}
 									</n-button>
 								</template>
@@ -81,8 +86,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import Vditor from 'vditor'
+import 'vditor/dist/index.css'
+import AiText from '@/components/AiText.vue'
+import { Icon } from '@iconify/vue'
 import {
-	NInput,
 	NCollapse,
 	NCollapseItem,
 	NButton,
@@ -92,10 +101,6 @@ import {
 	NLayoutSider,
 	NLayoutContent
 } from 'naive-ui'
-import { useRouter } from 'vue-router'
-import Vditor from 'vditor'
-import 'vditor/dist/index.css'
-import AiText from '@/components/AiText.vue'
 import $ from 'jquery'
 
 const router = useRouter()
@@ -107,7 +112,7 @@ const currentFileContent = ref('') // Reference for current file content
 const searchQuery = ref('') // 用于存储搜索框的值
 
 const collapseTitle = computed(() => {
-	return dropdownOpen.value ? '折叠面板标题 - ' : '折叠面板标题'
+	return dropdownOpen.value ? '所有文件 - ' : '所有文件'
 })
 
 const toggleDropdown = () => {
@@ -115,7 +120,7 @@ const toggleDropdown = () => {
 }
 
 const goHome = () => {
-	router.push('/home/Home')
+	router.push('/recent-files')
 }
 
 const addNewItem = () => {
@@ -188,10 +193,10 @@ const searchFiles = () => {
 	console.log('FIleName', searchQuery.value)
 	console.log('searchQuery.value.trim()', searchQuery.value.trim())
 	$.ajax({
-		url: 'http://192.168.0.129:8083/TextEditor/user/getFileByName',
+		url: 'http://192.168.0.129:8083/TextEditor/user/listFileByName',
 		type: 'POST',
 		contentType: 'application/json',
-		data: JSON.stringify({ fileName: searchQuery.value.trim() }), // 传递搜索参数
+		data: JSON.stringify(searchQuery.value.trim()), // 传递搜索参数
 		success: function (response) {
 			if (response.code === 200) {
 				// 更新文件列表
@@ -245,7 +250,22 @@ body {
 	background-color: #f8f8f8;
 	margin: 0;
 }
-
+input:focus {
+	outline: none;
+	box-shadow: none;
+}
+.file-button {
+	text-align: left !important;
+	display: flex;
+	margin-left: 0 !important;
+	justify-content: space-between;
+	margin-bottom: 10px; /* 每个选项之间的间距 */
+	font-size: 18px; /* 增加文件名的字体大小 */
+	text-overflow: ellipsis; /* 超出显示省略号 */
+	overflow: hidden;
+	white-space: nowrap;
+	color: #333; /* 按钮文本颜色 */
+}
 .sidebar {
 	padding: 20px;
 	height: 100%;
