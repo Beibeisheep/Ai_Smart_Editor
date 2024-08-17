@@ -1,11 +1,3 @@
-<!--
- * @Author: Beibeisheep 3248679944@qq.com
- * @Date: 2024-08-13 00:49:52
- * @LastEditors: Beibeisheep 3248679944@qq.com
- * @LastEditTime: 2024-08-14 12:13:59
- * @FilePath: \vue3-template\src\views\Demo.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
 <template>
 	<n-layout style="height: 100vh">
 		<n-layout-header
@@ -47,10 +39,12 @@
 			<n-layout-sider width="250" style="background-color: #f0f0f0">
 				<div class="sidebar">
 					<div style="display: flex; align-items: center; margin-bottom: 20px">
-						<n-input
+						<input
 							placeholder="搜索文件"
 							style="opacity: 0.7; flex: 1; margin-right: 10px"
 							clearable
+							v-model="searchQuery"
+							@input="searchFiles"
 						/>
 						<n-button @click="addNewItem" type="primary">+</n-button>
 					</div>
@@ -58,9 +52,14 @@
 						<n-collapse-item name="files" :title="collapseTitle">
 							<div style="display: flex; flex-direction: column">
 								<template v-for="(subItem, subIndex) in fileItems" :key="subIndex">
-									<router-link :to="subItem.path" style="margin-bottom: 5px">
-										{{ subItem.label }}
-									</router-link>
+									<n-button
+										block
+										text
+										@click="selectFile(subItem.fileId)"
+										style="text-align: left; margin-bottom: 5px"
+									>
+										{{ subItem.fileName }}
+									</n-button>
 								</template>
 							</div>
 						</n-collapse-item>
@@ -97,12 +96,15 @@ import { useRouter } from 'vue-router'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
 import AiText from '@/components/AiText.vue'
+import $ from 'jquery'
+
 const router = useRouter()
-const fileItems = ref([
-	{ label: '文件1', path: '/file1' },
-	{ label: '文件2', path: '/file2' }
-])
+const fileItems = ref([])
 const dropdownOpen = ref(false)
+const vditor = ref(null)
+const currentFileId = ref(null) // Reference for current file ID
+const currentFileContent = ref('') // Reference for current file content
+const searchQuery = ref('') // 用于存储搜索框的值
 
 const collapseTitle = computed(() => {
 	return dropdownOpen.value ? '折叠面板标题 - ' : '折叠面板标题'
@@ -119,11 +121,10 @@ const goHome = () => {
 const addNewItem = () => {
 	$.ajax({
 		url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
-		// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
 		type: 'POST',
 		success: function (response) {
 			console.log('文件创建成功:', response)
-			// 处理成功后的逻辑，例如更新文件列表
+			fetchFileList() // 重新获取文件列表
 		},
 		error: function (error) {
 			console.error('文件创建失败:', error)
@@ -131,11 +132,110 @@ const addNewItem = () => {
 	})
 }
 
+const fetchFileList = () => {
+	$.ajax({
+		url: 'http://192.168.0.129:8083/TextEditor/user/listFiles',
+		type: 'POST',
+		dataType: 'json',
+		success: (response) => {
+			if (response.code === 200) {
+				fileItems.value = response.data.map((file) => ({
+					fileId: file.fileId,
+					fileName: file.fileName
+				}))
+			} else {
+				console.error('获取数据时出错:', response.message)
+			}
+		},
+		error: (xhr, status, error) => {
+			console.error('获取数据时出错:', {
+				xhr,
+				status,
+				error
+			})
+		}
+	})
+}
+
+const selectFile = (fileId) => {
+	currentFileId.value = fileId
+	console.log('fileIdddddddddddddddddddddddddd', fileId)
+	$.ajax({
+		url: 'http://192.168.0.129:8083/TextEditor/user/getFileInfo',
+		type: 'POST',
+		contentType: 'application/json',
+		data: JSON.stringify(fileId),
+		success: function (response) {
+			if (response.code === 200) {
+				currentFileContent.value = response.data
+				console.log('currentFileContent.value', currentFileContent.value)
+				vditor.value.setValue(currentFileContent.value) // Update Vditor with the file content
+			} else {
+				console.error('获取文件内容时出错:', response.message)
+			}
+		},
+		error: function (error) {
+			console.error('获取文件内容失败:', error)
+		}
+	})
+}
+//搜索文件
+const searchFiles = () => {
+	if (searchQuery.value.trim() === '') {
+		fetchFileList() // 如果搜索框为空，则重新获取所有文件
+		return
+	}
+	console.log('FIleName', searchQuery.value)
+	console.log('searchQuery.value.trim()', searchQuery.value.trim())
+	$.ajax({
+		url: 'http://192.168.0.129:8083/TextEditor/user/getFileByName',
+		type: 'POST',
+		contentType: 'application/json',
+		data: JSON.stringify({ fileName: searchQuery.value.trim() }), // 传递搜索参数
+		success: function (response) {
+			if (response.code === 200) {
+				// 更新文件列表
+				fileItems.value = response.data.map((file) => ({
+					fileId: file.fileId,
+					fileName: file.fileName
+				}))
+			} else {
+				console.error('搜索文件时出错:', response.message)
+			}
+		},
+		error: function (error) {
+			console.error('搜索文件失败:', error)
+		}
+	})
+}
+
 onMounted(() => {
-	new Vditor('vditor', {
+	fetchFileList() // 获取文件列表
+
+	vditor.value = new Vditor('vditor', {
 		height: document.getElementById('vditor-container').offsetHeight,
 		width: document.getElementById('vditor-container').offsetWidth,
-		cache: { enable: false }
+		cache: { enable: false },
+		input: (value) => {
+			// 使用 `input` 回调函数监听内容变化
+			if (currentFileId.value) {
+				$.ajax({
+					url: 'http://192.168.0.129:8083/TextEditor/user/saveFile',
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify({
+						fileId: currentFileId.value,
+						fileContent: value
+					}),
+					success: function (response) {
+						console.log('文件保存成功:', response)
+					},
+					error: function (error) {
+						console.error('文件保存失败:', error)
+					}
+				})
+			}
+		}
 	})
 })
 </script>

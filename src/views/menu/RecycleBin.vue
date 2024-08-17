@@ -8,17 +8,14 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { defineComponent } from 'vue'
 import SideBar from '@/components/SideBar.vue'
 import DeleteTable from '@/components/DeleteTable.vue'
+
 export default defineComponent({
 	components: {
 		SideBar,
 		DeleteTable
-	},
-	setup() {
-		const router = useRouter()
 	}
 })
 </script>
@@ -28,14 +25,16 @@ export default defineComponent({
 	display: flex;
 	height: 100vh;
 }
+
 .box {
 	margin-left: 200px;
 	margin-top: 60px;
-	padding: 2rem;
+	padding: 0; /* 移除 padding 以填满整个可用空间 */
 	background-color: #fff;
 	border-radius: 5%;
 	box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-	overflow: auto;
 	flex: 1;
+	display: flex;
+	flex-direction: column;
 }
 </style>

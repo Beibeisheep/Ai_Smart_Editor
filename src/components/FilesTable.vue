@@ -1,45 +1,57 @@
 <template>
-	<n-space vertical>
-		<n-data-table :columns="columns" :data="tableData" :loading="loading" />
+	<div class="container">
+		<!-- 顶部导航栏 -->
+		<div class="navbar">
+			<div><h2>最近文件</h2></div>
+		</div>
+		<n-space vertical class="table-container">
+			<n-data-table :columns="columns" :data="tableData" :loading="loading" />
 
-		<!-- 重命名对话框 -->
-		<n-dialog class="rename" v-show="renameDialogVisible" title="重命名" :style="dialogStyle">
-			<div class="dialog-content">
-				<input type="text" v-model="newFileName" placeholder="输入新的文件名" :style="inputStyle" />
-			</div>
-			<div class="dialog-footer">
-				<n-space size="large">
-					<n-button @click="handleRenameConfirm" type="primary">确定</n-button>
-					<n-button @click="handleRenameCancel">取消</n-button>
-				</n-space>
-			</div>
-		</n-dialog>
+			<!-- 重命名对话框 -->
+			<n-dialog class="rename" v-show="renameDialogVisible" title="重命名" :style="dialogStyle">
+				<div class="dialog-content">
+					<input
+						type="text"
+						v-model="newFileName"
+						placeholder="输入新的文件名"
+						:style="inputStyle"
+					/>
+				</div>
+				<div class="dialog-footer">
+					<n-space size="large">
+						<n-button @click="handleRenameConfirm" type="primary">确定</n-button>
+						<n-button @click="handleRenameCancel">取消</n-button>
+					</n-space>
+				</div>
+			</n-dialog>
 
-		<!-- 删除确认对话框 -->
-		<n-dialog
-			class="delete"
-			v-show="deleteDialogVisible"
-			title="确认删除"
-			:style="dialogStyle"
-			type="warning"
-		>
-			<div class="dialog-content">
-				<p>确认删除吗？</p>
-			</div>
-			<div class="dialog-footer">
-				<n-space size="large">
-					<n-button @click="handleDeleteConfirm" type="warning">删除</n-button>
-					<n-button @click="handleDeleteCancel">取消</n-button>
-				</n-space>
-			</div>
-		</n-dialog>
-	</n-space>
+			<!-- 删除确认对话框 -->
+			<n-dialog
+				class="delete"
+				v-show="deleteDialogVisible"
+				title="确认删除"
+				:style="dialogStyle"
+				type="warning"
+			>
+				<div class="dialog-content">
+					<p>确认删除吗？</p>
+				</div>
+				<div class="dialog-footer">
+					<n-space size="large">
+						<n-button @click="handleDeleteConfirm" type="warning">删除</n-button>
+						<n-button @click="handleDeleteCancel">取消</n-button>
+					</n-space>
+				</div>
+			</n-dialog>
+		</n-space>
+	</div>
 </template>
 
 <script>
 import { defineComponent, ref, onMounted, h } from 'vue'
 import { NDataTable, NSpace, NPopover, NButton, NDialog, NInput } from 'naive-ui'
 import { Icon } from '@iconify/vue'
+import { useRouter } from 'vue-router'
 import $ from 'jquery'
 
 export default defineComponent({
@@ -52,6 +64,7 @@ export default defineComponent({
 		NInput
 	},
 	setup() {
+		const router = useRouter()
 		const tableData = ref([])
 		const loading = ref(true)
 		const renameDialogVisible = ref(false)
@@ -112,6 +125,10 @@ export default defineComponent({
 									h(NButton, { size: 'small', text: 'true', onClick: handleDelete }, () => [
 										h(Icon, { icon: 'material-symbols:delete-sharp' }),
 										'删除文件'
+									]),
+									h(NButton, { size: 'small', text: 'true', onClick: handlePreview }, () => [
+										h(Icon, { icon: 'ph:eye-duotone' }),
+										'预览文件'
 									])
 								])
 						}
@@ -264,6 +281,10 @@ export default defineComponent({
 			selectedFile.value = null
 		}
 
+		const handlePreview = () => {
+			router.push('/home/edit')
+		}
+
 		onMounted(() => {
 			fetchData()
 		})
@@ -291,6 +312,24 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.navbar {
+	margin-top: 34px;
+	background-color: #f8f9fa; /* 背景色 */
+	padding: 16px; /* 内边距 */
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影 */
+	display: flex;
+	align-items: center;
+	border-bottom: 1px solid #e9ecef; /* 底部边框 */
+}
+.container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+.table-container {
+	flex: 1; /* 使数据表格容器占据剩余空间 */
+	overflow: auto; /* 确保数据表格内容能滚动查看 */
+}
 .file-name {
 	cursor: default;
 }

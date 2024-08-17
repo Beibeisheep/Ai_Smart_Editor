@@ -32,11 +32,12 @@ export default defineComponent({
 .box {
 	margin-left: 200px;
 	margin-top: 60px;
-	padding: 2rem;
+	padding: 0; /* 移除 padding 以填满整个可用空间 */
 	background-color: #fff;
 	border-radius: 5%;
 	box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-	overflow: auto;
 	flex: 1;
+	display: flex;
+	flex-direction: column;
 }
 </style>
