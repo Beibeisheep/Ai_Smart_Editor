@@ -8,7 +8,8 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch } from 'vue'
+import { defineComponent, computed } from 'vue'
+import { useStore } from 'vuex'
 import { NButton, NMenu } from 'naive-ui'
 import { useRouter } from 'vue-router'
 
@@ -18,16 +19,19 @@ export default defineComponent({
 		NButton
 	},
 	setup() {
+		const store = useStore()
 		const router = useRouter()
-		const selectedKey = ref('最近文件')
 
-		const menuItems = ref([
+		// 从 Vuex 中获取 selectedMenuKey
+		const selectedKey = computed(() => store.getters['getSelectedMenuKey'])
+		console.log('selectedKeyyyyyyyyyyyyyyyy', selectedKey)
+		const menuItems = [
 			{ label: '最近文件', path: '/recent-files' },
 			{ label: '回收站', path: '/recycle-bin' }
-		])
+		]
 
 		const menuOptions = computed(() =>
-			menuItems.value.map((item) => ({
+			menuItems.map((item) => ({
 				label: item.label,
 				key: item.path,
 				path: item.path
@@ -38,55 +42,27 @@ export default defineComponent({
 			console.log('创建了一个文件')
 			$.ajax({
 				url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
-				// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
 				type: 'POST',
 				success: function (response) {
 					console.log('文件创建成功:', response)
-					// 处理成功后的逻辑，例如更新文件列表
+					store.commit('setSelectedItemKey', response.data.fileId)
+					router.push('/home/edit')
 				},
 				error: function (error) {
 					console.error('文件创建失败:', error)
 				}
 			})
-			router.push('/home/edit')
 		}
-		// const createFile = () => {
-		// 	console.log('创建了一个文件')
-		// 	$.ajax({
-		// 		url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
-		// 		// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
-		// 		type: 'POST',
-		// 		success: function (response) {
-		// 			if (response.fileId) {
-		// 				// 假设response中返回了fileId
-		// 				currentFileId.value = response.fileId
-		// 				console.log('获取到的文件ID:', currentFileId.value)
-		// 				// 在文件创建成功后，可以将用户重定向到编辑页面，并传递fileId
-		// 				router.push({ path: `/home/edit`, query: { fileId: currentFileId.value } })
-		// 			} else {
-		// 				console.error('文件ID未返回')
-		// 			}
-		// 		},
-		// 		error: function (error) {
-		// 			console.error('文件创建失败:', error)
-		// 		}
-		// 	})
-		// }
+
 		const handleMenuClick = (key) => {
-			const item = menuItems.value.find((menuItem) => menuItem.path === key)
+			const item = menuItems.find((menuItem) => menuItem.path === key)
 			if (item) {
 				console.log('点击了菜单项：', item.label)
 				router.push(item.path)
-				selectedKey.value = key // 更新选中的菜单项
+				// 使用 Vuex mutation 更新 selectedKey
+				store.commit('setSelectedMenuKey', key)
 			}
 		}
-		// 监听路由变化并更新 selectedKey
-		watch(
-			() => router.path,
-			(newPath) => {
-				selectedKey.value = newPath
-			}
-		)
 
 		return {
 			menuOptions,
@@ -133,3 +109,4 @@ div.btn {
 	background-color: #1e314d !important;
 }
 </style>
+

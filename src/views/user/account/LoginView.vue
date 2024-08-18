@@ -115,6 +115,7 @@ export default {
 				email: email.value,
 				password: password.value,
 				success() {
+					store.commit('setSelectedMenuKey', '/recent-files')
 					router.push('/recent-files')
 				},
 				error(msg) {

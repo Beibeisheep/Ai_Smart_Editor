@@ -69,6 +69,7 @@
 import { defineComponent, ref, onMounted, h } from 'vue'
 import { NDataTable, NSpace, NPopover, NButton, NDialog, NInput } from 'naive-ui'
 import { Icon } from '@iconify/vue'
+import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import $ from 'jquery'
 
@@ -84,6 +85,7 @@ export default defineComponent({
 	},
 	setup() {
 		const router = useRouter()
+		const store = useStore()
 		const tableData = ref([])
 		const loading = ref(true)
 		const renameDialogVisible = ref(false)
@@ -345,6 +347,8 @@ export default defineComponent({
 
 		// 文件预览
 		const handlePreview = () => {
+			console.log('selectedFile.value.fileId', selectedFile.value.fileId)
+			store.commit('setSelectedItemKey', selectedFile.value.fileId)
 			router.push('/home/edit')
 		}
 
@@ -429,3 +433,4 @@ input:focus {
 	justify-content: flex-end;
 }
 </style>
+

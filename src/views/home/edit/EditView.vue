@@ -31,7 +31,9 @@
 			</n-space>
 			<n-space style="margin-left: auto">
 				<n-button text style="color: white; margin-right: 30px">联系我们</n-button>
-				<n-button text style="color: white; padding-right: 20px">这里是用户名</n-button>
+				<n-button text style="color: white; padding-right: 20px"
+					>用户名: {{ $store.state.user.email }}</n-button
+				>
 			</n-space>
 		</n-layout-header>
 
@@ -59,17 +61,17 @@
 					</div>
 					<n-collapse v-model:value="dropdownOpen">
 						<n-collapse-item name="files" :title="collapseTitle">
-							<div style="display: flex; flex-direction: column">
-								<template v-for="(subItem, subIndex) in fileItems" :key="subIndex">
-									<n-button block text @click="selectFile(subItem.fileId)" class="file-button"
-										><Icon icon="ph:files-light" />
-										{{ subItem.fileName }}
-									</n-button>
-								</template>
-							</div>
+							<n-menu
+								:options="menuOptions"
+								:default-value="currentFileId"
+								@update:value="handleMenuSelect"
+								style="width: 100%; height: calc(100% - 40px); overflow-y: auto"
+							/>
 						</n-collapse-item>
 					</n-collapse>
-					<AiText />
+
+					<!-- <AiText :userText="vditor.value.getValue()" @update-son-thing="handleSonThingUpdate" />    获取不到文本编辑器内的实时数据-->
+					<AiText :userText="currentFileContent" @update-son-thing="handleSonThingUpdate" />
 				</div>
 			</n-layout-sider>
 
@@ -82,11 +84,24 @@
 			</n-layout-content>
 		</n-layout>
 	</n-layout>
+	<!-- 重命名对话框 -->
+	<n-dialog v-show="renameDialogVisible" title="重命名" :style="dialogStyle">
+		<div class="dialog-content">
+			<input type="text" v-model="newFileName" placeholder="输入新的文件名" :style="inputStyle" />
+		</div>
+		<div class="dialog-footer">
+			<n-space size="large">
+				<n-button @click="handleRenameConfirm" type="primary">确定</n-button>
+				<n-button @click="handleRenameCancel">取消</n-button>
+			</n-space>
+		</div>
+	</n-dialog>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch, h } from 'vue'
 import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
 import AiText from '@/components/AiText.vue'
@@ -99,20 +114,64 @@ import {
 	NLayout,
 	NLayoutHeader,
 	NLayoutSider,
-	NLayoutContent
+	NLayoutContent,
+	NMenu,
+	NDialog
 } from 'naive-ui'
 import $ from 'jquery'
 
 const router = useRouter()
+const store = useStore()
 const fileItems = ref([])
 const dropdownOpen = ref(false)
 const vditor = ref(null)
-const currentFileId = ref(null) // Reference for current file ID
+const currentFileId = computed(() => store.getters['getSelectedItemKey'])
+const renameDialogVisible = ref(false)
+const newFileName = ref('')
+const selectedFile = ref(null)
 const currentFileContent = ref('') // Reference for current file content
 const searchQuery = ref('') // 用于存储搜索框的值
-
+const editText = ref('') // 文本编辑器内的实时数据
+const newFileContent = ref('') //Ai改过格式的数据
+const dialogStyle = {
+	width: '300px', // 对话框宽度
+	top: '50%', // 垂直居中
+	left: '50%', // 水平居中
+	transform: 'translate(-50%, -50%)', // 用于居中对话框
+	position: 'fixed', // 保证对话框始终相对于页面定位
+	backgroundColor: 'white',
+	zIndex: 1000 // 保证对话框在所有内容之上
+}
+const inputStyle = {
+	border: '1px solid #dcdcdc',
+	borderRadius: '4px',
+	padding: '8px',
+	fontSize: '14px',
+	width: '100%',
+	height: '36px',
+	boxSizing: 'border-box'
+}
 const collapseTitle = computed(() => {
 	return dropdownOpen.value ? '所有文件 - ' : '所有文件'
+})
+const menuOptions = computed(() => {
+	return fileItems.value.map((file) => ({
+		label: file.fileName,
+		key: file.fileId,
+		icon: () => h(Icon, { icon: 'ph:files-light' }),
+		// 添加重命名按钮
+		extra: () =>
+			h(
+				NButton,
+				{
+					size: 'medium',
+					text: true,
+					onClick: () => handleRename(file),
+					style: { marginLeft: '4px' }
+				},
+				() => h(Icon, { icon: 'ic:outline-drive-file-rename-outline' })
+			)
+	}))
 })
 
 const toggleDropdown = () => {
@@ -120,12 +179,14 @@ const toggleDropdown = () => {
 }
 
 const goHome = () => {
+	store.commit('setSelectedMenuKey', '/recent-files')
 	router.push('/recent-files')
 }
 
 const addNewItem = () => {
 	$.ajax({
 		url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
+		// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
 		type: 'POST',
 		success: function (response) {
 			console.log('文件创建成功:', response)
@@ -161,9 +222,12 @@ const fetchFileList = () => {
 		}
 	})
 }
+const handleMenuSelect = (fileId) => {
+	selectFile(fileId)
+}
 
 const selectFile = (fileId) => {
-	currentFileId.value = fileId
+	store.commit('setSelectedMenuKey', fileId) // 更新 Vuex 中的
 	console.log('fileIdddddddddddddddddddddddddd', fileId)
 	$.ajax({
 		url: 'http://192.168.0.129:8083/TextEditor/user/getFileInfo',
@@ -175,6 +239,7 @@ const selectFile = (fileId) => {
 				currentFileContent.value = response.data
 				console.log('currentFileContent.value', currentFileContent.value)
 				vditor.value.setValue(currentFileContent.value) // Update Vditor with the file content
+				store.commit('setSelectedMenuKey', fileId)
 			} else {
 				console.error('获取文件内容时出错:', response.message)
 			}
@@ -213,10 +278,55 @@ const searchFiles = () => {
 		}
 	})
 }
+// 显示重命名对话框
+const handleRename = (file) => {
+	selectedFile.value = file.fileId
+	renameDialogVisible.value = true
+	newFileName.value = file.fileName
+	console.log('renameDialogVisible.valuuuuuuuuuuuuuuuuuuuuuuue', renameDialogVisible.value)
+}
 
+// 确认重命名操作
+const handleRenameConfirm = () => {
+	if (!newFileName.value.trim()) {
+		alert('文件名不能为空')
+		return
+	}
+	console.log('renameDialogVisible.valuuuuuuuuuuuuuuuuuuuuuuue', renameDialogVisible.value)
+	$.ajax({
+		url: 'http://192.168.0.129:8083/TextEditor/user/updateFileName',
+		type: 'POST',
+		contentType: 'application/json',
+		data: JSON.stringify({
+			fileId: selectedFile.value,
+			fileName: newFileName.value
+		}),
+		dataType: 'json',
+		success: (response) => {
+			if (response.code === 200) {
+				fetchFileList() // 更新文件列表
+				renameDialogVisible.value = false
+				newFileName.value = ''
+			} else {
+				console.error('重命名失败:', response.message)
+			}
+		},
+		error: (xhr, status, error) => {
+			console.error('重命名时出错:', { xhr, status, error })
+		}
+	})
+}
+
+// 取消重命名操作
+const handleRenameCancel = () => {
+	renameDialogVisible.value = false
+	newFileName.value = ''
+}
 onMounted(() => {
 	fetchFileList() // 获取文件列表
-
+	if (currentFileId.value) {
+		selectFile(currentFileId.value) // Load the selected file content
+	}
 	vditor.value = new Vditor('vditor', {
 		height: document.getElementById('vditor-container').offsetHeight,
 		width: document.getElementById('vditor-container').offsetWidth,
@@ -243,6 +353,28 @@ onMounted(() => {
 		}
 	})
 })
+// const handleSonThingUpdate = (aiText) => {
+//   newFileContent.value = aiText;
+// };
+const handleSonThingUpdate = (aiText) => {
+	newFileContent.value = aiText
+	currentFileContent.value = newFileContent.value // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
+	vditor.value.setValue(currentFileContent.value) // 更新 Vditor 中的内容
+}
+
+// setInterval(() => {
+//   const content = vditor.value
+//   if (content !== '' && content !== null && content !== undefined && content !== null) {
+//     console.log('vditor content:', content);
+//   }
+// }, 1000)
+// 监控 currentFileId 的变化
+watch(currentFileId, (newFileId, oldFileId) => {
+	if (newFileId !== oldFileId) {
+		selectFile(newFileId) // 当 currentFileId 变化时，自动加载新文件
+		store.commit('setSelectedMenuKey', fileId)
+	}
+})
 </script>
 
 <style scoped>
@@ -254,18 +386,7 @@ input:focus {
 	outline: none;
 	box-shadow: none;
 }
-.file-button {
-	text-align: left !important;
-	display: flex;
-	margin-left: 0 !important;
-	justify-content: space-between;
-	margin-bottom: 10px; /* 每个选项之间的间距 */
-	font-size: 18px; /* 增加文件名的字体大小 */
-	text-overflow: ellipsis; /* 超出显示省略号 */
-	overflow: hidden;
-	white-space: nowrap;
-	color: #333; /* 按钮文本颜色 */
-}
+
 .sidebar {
 	padding: 20px;
 	height: 100%;

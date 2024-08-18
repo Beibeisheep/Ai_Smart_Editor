@@ -26,6 +26,7 @@ export default {
 			// 通过账号密码登录
 			$.ajax({
 				// url: 'http://10.6.3.167:8083/TextEditor/user/login',
+				// url: 'http://192.168.1.5:8083/TextEditor/user/login',
 				url: 'http://192.168.0.129:8083/TextEditor/user/login',
 				type: 'post',
 				headers: {
