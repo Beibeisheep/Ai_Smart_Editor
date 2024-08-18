@@ -128,7 +128,6 @@ const vditor = ref(null)
 const currentFileId = computed(() => store.getters['getSelectedItemKey'])
 const renameDialogVisible = ref(false)
 const newFileName = ref('')
-const selectedFile = ref(null)
 const currentFileContent = ref('') // Reference for current file content
 const searchQuery = ref('') // 用于存储搜索框的值
 const editText = ref('') // 文本编辑器内的实时数据
@@ -227,13 +226,13 @@ const handleMenuSelect = (fileId) => {
 }
 
 const selectFile = (fileId) => {
-	store.commit('setSelectedMenuKey', fileId) // 更新 Vuex 中的
-	console.log('fileIdddddddddddddddddddddddddd', fileId)
+	store.commit('setSelectedItemKey', fileId) // 更新 Vuex 中的
+	console.log('fileIdddddddddddddddddddddddddd', currentFileId.value)
 	$.ajax({
 		url: 'http://192.168.0.129:8083/TextEditor/user/getFileInfo',
 		type: 'POST',
 		contentType: 'application/json',
-		data: JSON.stringify(fileId),
+		data: JSON.stringify(currentFileId.value),
 		success: function (response) {
 			if (response.code === 200) {
 				currentFileContent.value = response.data
@@ -280,7 +279,6 @@ const searchFiles = () => {
 }
 // 显示重命名对话框
 const handleRename = (file) => {
-	selectedFile.value = file.fileId
 	renameDialogVisible.value = true
 	newFileName.value = file.fileName
 	console.log('renameDialogVisible.valuuuuuuuuuuuuuuuuuuuuuuue', renameDialogVisible.value)
@@ -298,7 +296,7 @@ const handleRenameConfirm = () => {
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify({
-			fileId: selectedFile.value,
+			fileId: currentFileId.value,
 			fileName: newFileName.value
 		}),
 		dataType: 'json',
@@ -372,7 +370,6 @@ const handleSonThingUpdate = (aiText) => {
 watch(currentFileId, (newFileId, oldFileId) => {
 	if (newFileId !== oldFileId) {
 		selectFile(newFileId) // 当 currentFileId 变化时，自动加载新文件
-		store.commit('setSelectedMenuKey', fileId)
 	}
 })
 </script>
