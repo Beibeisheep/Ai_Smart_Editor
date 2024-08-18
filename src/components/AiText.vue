@@ -40,20 +40,22 @@
 					></path>
 				</svg>
 			</div>
-			<!-- 弹窗 -->
-			<div v-if="showOptionsModal" class="modal">
-				<div class="modal-header">
-					<span class="modal-title">服务</span>
-					<span class="close-btn" @click="showOptionsModal = false">×</span>
-				</div>
-				<div class="modal-body">
-					<div class="option-list">
-						<div class="option-item" @click="openAiCustomerService">AI 客服</div>
-						<div class="option-item">一键排版</div>
-						<div class="option-item">查错修错</div>
-					</div>
+			<div>
+		<!-- 弹窗 -->
+		<div v-if="showOptionsModal" class="modal">
+			<div class="modal-header">
+				<span class="modal-title">服务</span>
+				<span class="close-btn" @click="showOptionsModal = false">×</span>
+			</div>
+			<div class="modal-body">
+				<div class="option-list">
+					<div class="option-item" @click="openAiCustomerService">AI 客服</div>
+					<div class="option-item" @click.stop="handleOneKeyTypesetting">一键排版</div>
+										<div class="option-item">查错修错</div>
 				</div>
 			</div>
+		</div>
+	</div>
 
 			<!-- AI 客服聊天界面 -->
 			<div v-if="showChat" class="chat-modal">
@@ -156,96 +158,177 @@
 	</div>
 </template>
 
-<script>
-import axios from 'axios'
-import { v4 as uuidv4 } from 'uuid'
+<script lang="ts" setup>  
 
-export default {
-	data() {
-		return {
-			showOptionsModal: false,
-			showChat: false, // 控制 AI 客服聊天界面的显示
-			userInput: '',
-			chatHistory: [],
-			// 控制请求频率
-			lastRequestTime: 0,
-			requestDelay: 2000 // 2 秒的延迟
-		}
-	},
-	methods: {
-		showOptions() {
-			this.showOptionsModal = true
-			console.log('打开选择弹窗cccccccccccccc')
-		},
-		openAiCustomerService() {
-			console.log('关闭选择弹窗发；；；；；；；；；；；；；；；')
-			this.showOptionsModal = false
-			console.log('打开AI客服fffffffffffffffff')
-			this.showChat = true
-		},
-		closeChat() {
-			this.showChat = false
-		},
-		async sendMessage() {
-			if (!this.userInput.trim()) return
+// 引入必要的库和组件  
+import axios from 'axios';  
+import { v4 as uuidv4 } from 'uuid';  
+import { ref, defineEmits, defineProps } from 'vue';  
 
-			// 将用户消息添加到聊天历史中
-			const userMessage = {
-				id: uuidv4(),
-				sender: 'user',
-				text: this.userInput
-			}
-			this.chatHistory.push(userMessage)
+// 定义组件的状态  
+const aiText = ref(''); // AI 修改排版后的文本  
+const showOptionsModal = ref(false); // 是否显示选项弹窗  
+const showChat = ref(false); // 是否显示聊天窗口  
+const userInput = ref(''); // 用户输入的文本  
+const chatHistory = ref([]); // 聊天历史记录  
+const userText = ref(''); // 用户输入的文本（用于排版）  
+const lastRequestTime = ref(0); // 上次发送请求的时间  
+const requestDelay = ref(2000); // 发送请求的延迟时间（毫秒）  
 
-			// 检查上次请求时间，并控制请求频率
-			const now = Date.now()
-			if (now - this.lastRequestTime < this.requestDelay) {
-				console.log('请求频率过快，等待', this.requestDelay - (now - this.lastRequestTime), '毫秒')
-				return // 等待 2 秒后再发送请求
-			}
-			this.lastRequestTime = now
+// 定义组件的事件  
+const emit = defineEmits(['update-son-thing']); // 发送事件到父组件  
 
-			// 准备请求
-			const apiKey = ''
-			const apiUrl = 'https://api.openai.com/v1/chat/completions'
-			const headers = {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${apiKey}`
-			}
+// 定义组件的属性  
+const son_thing = ref(aiText); // 将 aiText 的值绑定到 son_thing  
 
-			// 请求数据
-			const data = {
-				model: 'gpt-3.5-turbo',
-				messages: [
-					{
-						role: 'system',
-						content: 'You are a helpful assistant.'
-					},
-					{
-						role: 'user',
-						content: this.userInput
-					}
-				]
-			}
+// 定义组件的属性（来自父组件）  
+const props = defineProps({  
+  userText: {  
+    type: String,  
+    default: "",  
+  }  
+})  
 
-			try {
-				const response = await axios.post(apiUrl, data, { headers })
-				const assistantMessage = {
-					id: uuidv4(),
-					sender: 'assistant',
-					text: response.data.choices[0].message.content
-				}
+// 打开选项弹窗  
+const showOptions = () => {
+  showOptionsModal.value = true;
+  console.log('打开选择弹窗cccccccccccccc');
+}
 
-				// 将助手消息添加到聊天历史中
-				this.chatHistory.push(assistantMessage)
-				this.userInput = ''
-			} catch (error) {
-				console.error('Error sending message:', error)
-			}
-		}
-	}
+// 打开 AI 客服
+const openAiCustomerService = () => {
+  showOptionsModal.value = false;
+  console.log('关闭选择弹窗发；；；；；；；；；；；；；；；');
+  console.log('打开AI客服fffffffffffffffff');
+  showChat.value = true;
+}
+
+// 关闭聊天窗口
+const closeChat = () => {
+  showChat.value = false;
+}
+
+// 发送消息到 AI 客服
+const sendMessage = async () => {
+  // 检查用户输入是否为空
+  if (!userInput.value.trim()) return;
+
+  // 创建用户消息
+  const userMessage = {
+    id: uuidv4(),
+    sender: 'user',
+    text: userInput.value
+  }
+  chatHistory.value.push(userMessage);
+
+  // 检查请求频率  
+  const now = Date.now();
+  if (now - lastRequestTime.value < requestDelay.value) {
+    console.log('请求频率过快，等待', requestDelay.value - (now - lastRequestTime.value), '毫秒');
+    return;
+  }
+  lastRequestTime.value = now;
+
+  // 设置 API 请求参数
+  const apiKey = 'sk-zuVXPB1XovwTHNld896471C1E0A54b3cB7E17f826d8f9f7a';
+  const apiUrl = 'https://xiaoai.plus/v1/chat/completions';
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${apiKey}`
+  }
+
+  // 创建请求数据
+  const data = {
+    model: 'gpt-4',
+    messages: [
+      {
+        role: 'system',
+        content: '你是一个尽职尽责的文本客服，将根据提供给你的上下文信息和问你的问题给出适宜的回答。'
+      },
+      {
+        role: 'user',
+        content: userInput.value
+      }
+    ],
+		top_p: 1,
+		// prompt: props.userText,  这里是给ai提供的上下文，也就是文本编辑器内的信息，但是userText拿不到实时的值。如果能拿到就可以放出来
+		max_tokens: 1000,
+		temperature: 0.6
+  }
+
+  try {  
+    // 发送请求到 AI API  
+    const response = await axios.post(apiUrl, data, { headers });
+    // 创建 AI 回复消息
+    const assistantMessage = {
+      id: uuidv4(),
+      sender: 'assistant',
+      text: response.data.choices[0].message.content
+    }
+    chatHistory.value.push(assistantMessage);
+    userInput.value = ''; // 清空用户输入框
+  } catch (error) {
+    console.error('Error sending message:', error);
+  }
+}
+
+// AI 排版（转换 Markdown 格式）
+const AiTypesetting = async () => {
+  // 检查用户输入是否为空
+  if (!props.userText.trim()) return;
+
+  // 设置 API 请求
+  const apiUrl = 'https://xiaoai.plus/v1/chat/completions';
+  const apiKey = 'sk-zuVXPB1XovwTHNld896471C1E0A54b3cB7E17f826d8f9f7a';
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${apiKey}`
+  }
+
+  // 创建请求数据
+  const data2 = {
+    model: 'gpt-3.5-turbo-16k',
+    messages: [
+      {
+        role: 'system',
+        content: '接下来，我将提供一段普通文本或者Markdown格式文本，请你把它转换为标准的Markdown格式，并且按照适宜的格式修改。在转换过程中，请确保一切内容按原样保留，不要做任何改动或缩减。同时，注意适当地使用Markdown语法使文本的可读性提高，并且注意适当的换行。但请遵循本次转换的基本原则：内容不可被修改。并且不论我给你的任何内容，你都应该将其转换为合适的markdown内容输出。再次注意，不论我问你任何问题，还是我和你说任何话，你只需要将我给你的文本作为原始文本，然后以markdown格式输出为合适的格式。不需要以代码块形式输出，也就是说不用加“```”'  
+      },
+      {
+        role: 'user',
+        content: props.userText
+      }
+    ],
+		top_p: 1,
+		prompt: props.userText,
+		max_tokens: 1000,
+		temperature: 0.6
+  }
+
+  try {
+    // 发送请求到 AI Api
+    const response = await axios.post(apiUrl, data2, { headers });
+    // 更新 aiText 和 son_thing
+    aiText.value = response.data.choices[0].message.content;
+    son_thing.value = response.data.choices[0].message.content;
+    emit('update-son-thing', son_thing.value); // 发送事件到父组件
+  } catch (error) {
+    console.error('Error during typesetting:', error);
+  }
+}
+
+// 发送事件到父组件
+const sendBackToFather = () => {
+  emit('update-son-thing', son_thing.value);
+}
+
+// 一键排版
+const handleOneKeyTypesetting = async () => {
+  await AiTypesetting(); // 等待 AiTypesetting 函数完成
+  sendBackToFather(); // 发送事件到父组件
+  console.log("??????????????//", userText)
 }
 </script>
+
 
 <style scoped>
 .service {

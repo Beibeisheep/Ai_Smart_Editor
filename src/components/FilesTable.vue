@@ -156,7 +156,7 @@ export default defineComponent({
 		// 获取数据
 		const fetchData = () => {
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/listFiles',
+				url: 'http://192.168.1.5:8083/TextEditor/user/listFiles',
 				type: 'POST',
 				dataType: 'json',
 				success: (response) => {
@@ -208,7 +208,7 @@ export default defineComponent({
 			}
 
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/updateFileName',
+				url: 'http://192.168.1.5:8083/TextEditor/user/updateFileName',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify({
@@ -251,7 +251,7 @@ export default defineComponent({
 			if (!selectedFile.value) return
 
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/removeFile',
+				url: 'http://192.168.1.5:8083/TextEditor/user/removeFile',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify(selectedFile.value.fileId),

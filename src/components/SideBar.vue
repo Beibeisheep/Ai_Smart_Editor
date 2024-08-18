@@ -37,7 +37,7 @@ export default defineComponent({
 		const createFile = () => {
 			console.log('创建了一个文件')
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
+				url: 'http://192.168.1.5:8083/TextEditor/user/createFile',
 				// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
 				type: 'POST',
 				success: function (response) {
@@ -53,7 +53,7 @@ export default defineComponent({
 		// const createFile = () => {
 		// 	console.log('创建了一个文件')
 		// 	$.ajax({
-		// 		url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
+		// 		url: 'http://192.168.1.5:8083/TextEditor/user/createFile',
 		// 		// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
 		// 		type: 'POST',
 		// 		success: function (response) {

@@ -64,7 +64,11 @@
 							</div>
 						</n-collapse-item>
 					</n-collapse>
-					<AiText />
+
+					
+					<!-- <AiText :userText="vditor.value.getValue()" @update-son-thing="handleSonThingUpdate" />    获取不到文本编辑器内的实时数据-->
+					<AiText :userText="currentFileContent" @update-son-thing="handleSonThingUpdate" />
+
 				</div>
 			</n-layout-sider>
 
@@ -105,6 +109,10 @@ const vditor = ref(null)
 const currentFileId = ref(null) // Reference for current file ID
 const currentFileContent = ref('') // Reference for current file content
 const searchQuery = ref('') // 用于存储搜索框的值
+const editText = ref('') // 文本编辑器内的实时数据
+
+const newFileContent = ref('');  //Ai改过格式的数据
+
 
 const collapseTitle = computed(() => {
 	return dropdownOpen.value ? '折叠面板标题 - ' : '折叠面板标题'
@@ -120,7 +128,8 @@ const goHome = () => {
 
 const addNewItem = () => {
 	$.ajax({
-		url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
+		url: 'http://192.168.1.5:8083/TextEditor/user/createFile',
+		// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
 		type: 'POST',
 		success: function (response) {
 			console.log('文件创建成功:', response)
@@ -134,7 +143,7 @@ const addNewItem = () => {
 
 const fetchFileList = () => {
 	$.ajax({
-		url: 'http://192.168.0.129:8083/TextEditor/user/listFiles',
+		url: 'http://192.168.1.5:8083/TextEditor/user/listFiles',
 		type: 'POST',
 		dataType: 'json',
 		success: (response) => {
@@ -161,7 +170,7 @@ const selectFile = (fileId) => {
 	currentFileId.value = fileId
 	console.log('fileIdddddddddddddddddddddddddd', fileId)
 	$.ajax({
-		url: 'http://192.168.0.129:8083/TextEditor/user/getFileInfo',
+		url: 'http://192.168.1.5:8083/TextEditor/user/getFileInfo',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify(fileId),
@@ -188,7 +197,7 @@ const searchFiles = () => {
 	console.log('FIleName', searchQuery.value)
 	console.log('searchQuery.value.trim()', searchQuery.value.trim())
 	$.ajax({
-		url: 'http://192.168.0.129:8083/TextEditor/user/getFileByName',
+		url: 'http://192.168.1.5:8083/TextEditor/user/getFileByName',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify({ fileName: searchQuery.value.trim() }), // 传递搜索参数
@@ -220,7 +229,7 @@ onMounted(() => {
 			// 使用 `input` 回调函数监听内容变化
 			if (currentFileId.value) {
 				$.ajax({
-					url: 'http://192.168.0.129:8083/TextEditor/user/saveFile',
+					url: 'http://192.168.1.5:8083/TextEditor/user/saveFile',
 					type: 'POST',
 					contentType: 'application/json',
 					data: JSON.stringify({
@@ -238,6 +247,21 @@ onMounted(() => {
 		}
 	})
 })
+// const handleSonThingUpdate = (aiText) => {  
+//   newFileContent.value = aiText;
+// };
+const handleSonThingUpdate = (aiText) => {  
+  newFileContent.value = aiText;  
+  currentFileContent.value = newFileContent.value; // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
+  vditor.value.setValue(currentFileContent.value); // 更新 Vditor 中的内容
+};
+
+// setInterval(() => {  
+//   const content = vditor.value
+//   if (content !== '' && content !== null && content !== undefined && content !== null) {  
+//     console.log('vditor content:', content);  
+//   }  
+// }, 1000)
 </script>
 
 <style scoped>

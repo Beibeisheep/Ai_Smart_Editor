@@ -54,7 +54,7 @@ export default defineComponent({
 
 		const fetchData = () => {
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/getRecycleBinFileInfo',
+				url: 'http://192.168.1.5:8083/TextEditor/user/getRecycleBinFileInfo',
 				type: 'POST',
 				dataType: 'json',
 				success: (response) => {
