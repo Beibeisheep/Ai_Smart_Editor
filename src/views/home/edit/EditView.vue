@@ -71,7 +71,8 @@
 					</n-collapse>
 
 					<!-- <AiText :userText="vditor.value.getValue()" @update-son-thing="handleSonThingUpdate" />    获取不到文本编辑器内的实时数据-->
-					<AiText :userText="currentFileContent" @update-son-thing="handleSonThingUpdate" />
+					<!-- <AiText :userText="currentFileContent" @update-son-thing="handleSonThingUpdate" /> -->
+					<AiText />
 				</div>
 			</n-layout-sider>
 
@@ -131,7 +132,8 @@ const newFileName = ref('')
 const currentFileContent = ref('') // Reference for current file content
 const searchQuery = ref('') // 用于存储搜索框的值
 const editText = ref('') // 文本编辑器内的实时数据
-const newFileContent = ref('') //Ai改过格式的数据
+const newFileContent = computed(() => store.getters['getAiText']) //Ai改过格式的数据
+console.log('newFileContent)))AIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII', newFileContent.value)
 const dialogStyle = {
 	width: '300px', // 对话框宽度
 	top: '50%', // 垂直居中
@@ -239,6 +241,7 @@ const selectFile = (fileId) => {
 				console.log('currentFileContent.value', currentFileContent.value)
 				vditor.value.setValue(currentFileContent.value) // Update Vditor with the file content
 				store.commit('setSelectedMenuKey', fileId)
+				store.commit('setUserText', currentFileContent.value)
 			} else {
 				console.error('获取文件内容时出错:', response.message)
 			}
@@ -354,8 +357,7 @@ onMounted(() => {
 // const handleSonThingUpdate = (aiText) => {
 //   newFileContent.value = aiText;
 // };
-const handleSonThingUpdate = (aiText) => {
-	newFileContent.value = aiText
+const handleSonThingUpdate = () => {
 	currentFileContent.value = newFileContent.value // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
 	vditor.value.setValue(currentFileContent.value) // 更新 Vditor 中的内容
 }
@@ -370,6 +372,12 @@ const handleSonThingUpdate = (aiText) => {
 watch(currentFileId, (newFileId, oldFileId) => {
 	if (newFileId !== oldFileId) {
 		selectFile(newFileId) // 当 currentFileId 变化时，自动加载新文件
+	}
+})
+
+watch(newFileContent, (newValue) => {
+	if (newValue) {
+		handleSonThingUpdate() // 当 newFileContent 改变时，自动更新 Vditor 内容
 	}
 })
 </script>
