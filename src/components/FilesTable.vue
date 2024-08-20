@@ -196,10 +196,12 @@ export default defineComponent({
 				type: 'POST',
 				success: function (response) {
 					console.log('文件创建成功:', response)
+					window.$message.success('创建成功')
 					fetchData() // 重新获取文件列表
 				},
 				error: function (error) {
 					console.error('文件创建失败:', error)
+					window.$message.error('创建失败')
 				}
 			})
 		}
@@ -258,7 +260,7 @@ export default defineComponent({
 			console.log('FIleName', newFileName.value)
 			console.log('searchQuery.value.trim()', newFileName.value.trim())
 			if (!newFileName.value.trim()) {
-				alert('文件名不能为空')
+				window.$message.error('文件名不能为空')
 				return
 			}
 
@@ -277,7 +279,7 @@ export default defineComponent({
 						renameDialogVisible.value = false
 						newFileName.value = ''
 					} else {
-						console.error('重命名失败:', response.message)
+						window.$message.error('重命名失败')
 					}
 				},
 				error: (xhr, status, error) => {
@@ -292,10 +294,10 @@ export default defineComponent({
 			newFileName.value = ''
 		}
 
-		// 确认删除操作
+		// 移动进回收站操作
 		const handleDelete = () => {
 			if (selectedKeys.value.length === 0) {
-				alert('请选择要删除的文件')
+				window.$message.warning('未选择文件')
 				return
 			}
 
@@ -309,8 +311,9 @@ export default defineComponent({
 					if (response.code === 200) {
 						fetchData()
 						selectedKeys.value = [] // 清空选中项
+						window.$message.success('移动成功')
 					} else {
-						console.error('删除失败:', response.message)
+						window.$message.error('移动失败')
 					}
 				},
 				error: (xhr, status, error) => {
@@ -319,6 +322,7 @@ export default defineComponent({
 						status,
 						error
 					})
+					window.$message.error('移动时出错')
 				}
 			})
 		}
@@ -437,4 +441,3 @@ input:focus {
 	justify-content: flex-end;
 }
 </style>
-

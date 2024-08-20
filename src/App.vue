@@ -26,6 +26,10 @@ const ShowNavBar = computed(() => {
 
 <template>
 	<div>
+		<n-message-provider>
+			<MessageApi />
+		</n-message-provider>
+
 		<!-- 仅在 ShowNavBar 为 true 时渲染 NavBar -->
 		<NavBar v-if="ShowNavBar" />
 		<router-view></router-view>
@@ -36,9 +40,13 @@ const ShowNavBar = computed(() => {
 
 <script>
 import NavBar from './components/NavBar.vue'
+import MessageApi from './components/MessageApi.vue'
+import { NMessageProvider } from 'naive-ui'
+
 export default {
 	components: {
-		NavBar
+		NavBar,
+		MessageApi
 	}
 }
 </script>

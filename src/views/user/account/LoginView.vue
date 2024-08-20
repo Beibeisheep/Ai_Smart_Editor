@@ -1,13 +1,11 @@
 <template>
 	<div class="box">
-		<div class="row justify-content-center">
-			<div class="col-8 d-none d-md-block"></div>
-			<div class="col-4 col-md-4">
-				<h1>Editor</h1>
+		<div class="row">
+			<div class="col-8"></div>
+			<div class="col-4">
 				<form @submit.prevent="login">
-					<!--.prevent是防止默认行为-->
+					<h1 class="text-center">Editor</h1>
 					<div class="mb-3">
-						<!--v-model绑定export出来的变量-->
 						<input
 							v-model="email"
 							type="text"
@@ -25,15 +23,12 @@
 							placeholder="请输入密码"
 						/>
 					</div>
-
 					<div class="mb-3">
 						<div class="error_message">{{ error_message }}</div>
 					</div>
-					<div class="login_btn">
+					<div class="form-buttons">
 						<button type="submit" class="btn btn-primary">登录</button>
-					</div>
-					<div class="register_btn" @click="register">
-						<button type="submit" class="btn btn-success">注册</button>
+						<button type="button" @click="register" class="btn btn-success">注册</button>
 					</div>
 				</form>
 			</div>
@@ -44,70 +39,14 @@
 <script>
 import { useStore } from 'vuex'
 import { ref } from 'vue'
-// import $ from "jquery";
 import router from '../../../router/index'
 
 export default {
 	setup() {
-		const store = useStore() //使用这个去调用store里面的方法，并且将值传入store中当做全局变量使用
-		let email = ref('')
-		let password = ref('')
-		let error_message = ref('')
-
-		// let token = localStorage.getItem("token");
-		// if (token != null) {
-		//   store.commit("updateToken", token);
-		//   store.dispatch("getinfo", {
-		//     success() {
-		//       router.push({ name: "home" });
-		//     },
-		//   });
-		// }
-
-		// const login = () => {
-		//   error_message.value = "";
-		//   store.dispatch("login", {
-		//     email: email.value,
-		//     password: password.value, //用ref取值时要用.value
-		//     success() {
-		//       store.dispatch("getinfo", {
-		//         success() {
-		//           router.push({ name: "home" });
-		//         },
-		//       });
-		//     },
-		//     error() {
-		//       error_message.value = "用户名或密码错误";
-		//     },
-		//   });
-		// };
-		// const login = () => {
-		//   error_message.value = "";
-		//   $.ajax({
-		//     url: "http://10.6.3.167:8083/TextEditor/user/login",
-		//     type: "post",
-		//     headers: {
-		//       "Content-Type": "application/json",
-		//     },
-		//     data: JSON.stringify({
-		//       email: email.value,
-		//       password: password.value,
-		//     }),
-		//     dataType: "json",
-		//     success(resp) {
-		//       if (resp.message == "success") {
-		//         router.push({ name: "HomeView" });
-		//         store.dispatch("getinfo", {
-		//           success() {
-		//             router.push({ name: "HomeView" });
-		//           },
-		//         });
-		//       } else {
-		//         error_message.value = "用户名或密码错误";
-		//       }
-		//     },
-		//   });
-		// };
+		const store = useStore()
+		const email = ref('')
+		const password = ref('')
+		const error_message = ref('')
 
 		const login = () => {
 			error_message.value = ''
@@ -115,11 +54,13 @@ export default {
 				email: email.value,
 				password: password.value,
 				success() {
+					window.$message.success('登陆成功')
 					store.commit('setSelectedMenuKey', '/recent-files')
 					router.push('/recent-files')
 				},
 				error(msg) {
 					error_message.value = msg
+					window.$message.error('登陆失败')
 				}
 			})
 		}
@@ -145,30 +86,27 @@ body {
 	font-family: Arial, sans-serif; /* Default font */
 }
 
-div.box {
-	width: 80vw;
-	margin-left: 10vw;
-	margin-top: 10vh;
+.box {
+	width: 60vw; /* Adjusted width */
+	margin: 5vh auto; /* Center horizontally and position vertically */
 	border-radius: 5%;
 }
-div.col-4 {
-	background-color: white;
-	/* 新增样式 */
+
+.row {
+	height: 100vh; /* Full viewport height */
 	display: flex;
-	flex-direction: row;
+	align-items: center;
+	justify-content: center;
 }
 
-div.error_message {
-	color: red;
-}
-
-h1 {
-	padding-top: 5px;
-	color: #2e466a; /* Blue header color */
-	font-size: 28px; /* Larger font size */
-	font-family: 'Dancing Script', cursive;
-	margin-bottom: 20px; /* Space below the heading */
-	text-align: center;
+.col-4 {
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 }
 
 div.mb-3 {
@@ -178,12 +116,12 @@ div.mb-3 {
 	align-items: center;
 }
 
-div.mb-3:first-child {
-	margin-top: 7vh;
-}
-
-div.mb-3:nth-of-type(3) {
-	margin-top: 2vh;
+h1 {
+	color: #2e466a;
+	font-size: 28px;
+	font-family: 'Dancing Script', cursive;
+	margin-bottom: 20px;
+	text-align: center;
 }
 
 input.form-control {
@@ -196,39 +134,40 @@ input.form-control {
 		border-color 0.15s ease-in-out,
 		box-shadow 0.15s ease-in-out;
 }
+
 input.form-control:focus {
 	outline: none;
 	border-color: #80bdff;
 	box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-div.register_btn {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-top: 30px; /* Adjust this value to increase the distance */
+.error_message {
+	color: red;
+	text-align: center;
 }
 
-div.login_btn {
+.form-buttons {
 	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-top: 30px; /* Added margin top for spacing */
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 20px;
+	width: 300px;
+	height: 100px;
 }
 
 button {
 	width: 100%;
 	padding: 10px;
 	font-size: 18px;
-	background-color: #354c6e; /* Blue button background color */
-	color: white; /* Button text color */
+	background-color: #354c6e;
+	color: white;
 	border: none;
 	border-radius: 5px;
 	cursor: pointer;
-	transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+	transition: background-color 0.3s ease;
 }
 
 button:hover {
-	background-color: #1e314d; /* Darker shade of blue on hover */
+	background-color: #1e314d;
 }
 </style>

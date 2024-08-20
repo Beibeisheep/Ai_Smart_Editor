@@ -195,6 +195,7 @@ const addNewItem = () => {
 		type: 'POST',
 		success: function (response) {
 			console.log('文件创建成功:', response)
+			window.$message.success('创建成功')
 			store.commit('setSelectedItemKey', response.data.fileId)
 			fetchFileList() // 重新获取文件列表
 		},

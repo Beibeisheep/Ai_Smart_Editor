@@ -12,7 +12,9 @@
 									{{ $store.state.user.email }}
 								</n-button>
 							</template>
-							<n-dropdown-item @click="logout">退出登录</n-dropdown-item>
+							<n-dropdown-item @click="logout" :style="{ cursor: 'pointer' }"
+								>退出登录</n-dropdown-item
+							>
 						</n-dropdown>
 					</template>
 

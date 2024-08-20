@@ -3,7 +3,10 @@
 		<!-- 顶部导航栏 -->
 		<div class="navbar">
 			<n-space align="center" justify="space-between" style="width: 100%">
-				<h2 class="recycle-bin-title">回收站</h2>
+				<n-space align="center"
+					><h2 class="recycle-bin-title">回收站</h2>
+					<h4 class="recycle-bin-content">文件保留 7 天后将彻底删除</h4></n-space
+				>
 				<n-space>
 					<n-button type="success" text @click="handleRestoreMultiple">
 						<Icon icon="ic:outline-restore-from-trash" /> 恢复选中文件
@@ -192,12 +195,15 @@ export default defineComponent({
 					if (response.code === 200) {
 						fetchData()
 						clearDialogVisible.value = false
+						window.$message.success('清空成功')
 					} else {
 						console.error('Error deleting files:', response.message)
+						window.$message.error('清空失败')
 					}
 				},
 				error: (xhr, status, error) => {
 					console.error('Error deleting files:', { xhr, status, error })
+					window.$message.error('清空时出错')
 				}
 			})
 		}
@@ -216,7 +222,7 @@ export default defineComponent({
 
 		const handleRestoreMultiple = () => {
 			if (!selectedKeys.value.length) {
-				console.error('No files selected for restoration.')
+				window.$message.warning('未选择文件')
 				return
 			}
 
@@ -234,26 +240,29 @@ export default defineComponent({
 						fetchData()
 						restoreDialogVisible.value = false
 						selectedKeys.value = [] // Clear selected keys after restore
+						window.$message.success('恢复成功')
 					} else {
 						console.error('恢复失败:', response.message)
+						window.$message.error('恢复失败')
 					}
 				},
 				error: (xhr, status, error) => {
 					console.error('恢复时出错:', { xhr, status, error })
+					window.$message.error('恢复时出错')
 				}
 			})
 		}
 
 		const handleDeleteMultiple = () => {
+			if (!selectedKeys.value.length) {
+				window.$message.warning('未选择文件')
+				return
+			}
+
 			deleteDialogVisible.value = true
 		}
 
 		const handleDeleteConfirm = () => {
-			if (!selectedKeys.value.length) {
-				console.error('No files selected for deletion.')
-				return
-			}
-
 			const fileIdsToDelete = selectedKeys.value
 
 			$.ajax({
@@ -267,12 +276,15 @@ export default defineComponent({
 						fetchData()
 						deleteDialogVisible.value = false
 						selectedKeys.value = [] // Clear selected keys after delete
+						window.$message.success('删除成功')
 					} else {
 						console.error('删除失败:', response.message)
+						window.$message.error('删除失败')
 					}
 				},
 				error: (xhr, status, error) => {
 					console.error('删除时出错:', { xhr, status, error })
+					window.$message.error('删除时出错')
 				}
 			})
 		}
@@ -352,7 +364,10 @@ export default defineComponent({
 .recycle-bin-title {
 	color: rgba(0, 0, 0, 0.721);
 }
-
+.recycle-bin-content {
+	color: rgba(0, 0, 0, 0.603);
+	margin-left: 4px;
+}
 .n-dialog {
 	position: fixed;
 	top: 50%;

@@ -59,6 +59,7 @@ export default {
 		logout(context) {
 			// 退出登录
 			context.commit('logout')
+			window.$message.success('退出登录')
 		}
 	},
 	modules: {}

@@ -77,10 +77,12 @@ export default {
 				}),
 				dataType: 'json',
 				success(resp) {
-					if (resp.message == 'success') {
+					if (resp.message == '注册成功') {
+						window.$message.success('注册成功')
 						router.push({ name: 'LoginView' }) //使用router跳转界面
 					} else {
 						error_message.value = resp.message
+						window.$message.error('注册失败')
 					}
 				}
 			})
@@ -102,18 +104,29 @@ export default {
 	width: 30%;
 	border-radius: 50%;
 }
-div.box {
-	width: 80vw;
-	margin-left: 10vw;
-	margin-top: 10vh;
+.box {
+	width: 60vw; /* Adjusted width */
+	margin: 5vh auto; /* Center horizontally and position vertically */
 	border-radius: 5%;
 }
-div.col-4 {
-	background-color: white;
-	/* 新增样式 */
+
+.row {
+	height: 100vh; /* Full viewport height */
 	display: flex;
-	flex-direction: row;
+	align-items: center;
+	justify-content: center;
 }
+
+.col-4 {
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
 div.error_message {
 	color: red;
 }

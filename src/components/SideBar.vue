@@ -50,6 +50,7 @@ export default defineComponent({
 				},
 				error: function (error) {
 					console.error('文件创建失败:', error)
+					window.$message.error('创建失败')
 				}
 			})
 		}
