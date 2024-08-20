@@ -5,6 +5,8 @@ import HomeView from '../views/home/HomeView.vue'
 import EditView from '../views/home/edit/EditView.vue'
 import RecentFiles from '../views/menu/RecentFiles.vue'
 import RecycleBin from '../views/menu/RecycleBin.vue'
+import ContactView from '../views/home/ContactView.vue'
+import PreviewVditor from '@/views/home/PreviewVditor.vue'
 import store from '@/stores'
 // const router = createRouter({
 //   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,6 +36,16 @@ const routes = [
 		path: '/recycle-bin',
 		name: 'RecycleBin',
 		component: RecycleBin
+	},
+	{
+		path: '/contact-us',
+		name: 'ContactView',
+		component: ContactView // 对应的组件
+	},
+	{
+		path: '/preview',
+		name: 'PreviewVditor',
+		component: PreviewVditor
 	},
 	{
 		path: '/user/account/login/',

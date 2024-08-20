@@ -65,7 +65,7 @@ export default {
 			$.ajax({
 				// url: 'http://192.168.1.5:8083/TextEditor/user/register',
 				// url: 'http://10.6.3.167:8083/TextEditor/user/register',
-				url: 'http://192.168.1.5:8083/TextEditor/user/register',
+				url: 'http://192.168.0.129:8083/TextEditor/user/register',
 				type: 'post',
 				headers: {
 					'Content-Type': 'application/json'

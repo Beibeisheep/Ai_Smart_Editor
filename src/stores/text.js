@@ -1,23 +1,39 @@
-// text.js
 const text = {
 	state: () => ({
-		aiText: '', // 存储 AI 修改过的文本
-		userText: '' // 存储用户输入的文本，供 AI 处理
+		// 使用对象存储每个文件的文本
+		files: {},
+		shouldUpdateUserText: false // 默认值为 false
 	}),
 	mutations: {
-		setAiText(state, text) {
-			state.aiText = text
+		setAiText(state, { fileId, text }) {
+			// 设置指定 fileId 的 AI 文本
+			if (!state.files[fileId]) {
+				state.files[fileId] = {}
+			}
+			state.files[fileId].aiText = text
 		},
-		setUserText(state, text) {
-			state.userText = text
+		setUserText(state, { fileId, text }) {
+			// 设置指定 fileId 的用户文本
+			if (!state.files[fileId]) {
+				state.files[fileId] = {}
+			}
+			state.files[fileId].userText = text
+		},
+		setShouldUpdateUserText(state, value) {
+			state.shouldUpdateUserText = value
 		}
 	},
 	getters: {
-		getAiText(state) {
-			return state.aiText
+		getAiText: (state) => (fileId) => {
+			// 获取指定 fileId 的 AI 文本
+			return state.files[fileId]?.aiText || ''
 		},
-		getUserText(state) {
-			return state.userText
+		getUserText: (state) => (fileId) => {
+			// 获取指定 fileId 的用户文本
+			return state.files[fileId]?.userText || ''
+		},
+		getShouldUpdateUserText: (state) => {
+			return state.shouldUpdateUserText
 		}
 	}
 }

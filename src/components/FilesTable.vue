@@ -2,28 +2,41 @@
 	<div class="container">
 		<!-- 顶部导航栏 -->
 		<div class="navbar">
-			<h2 class="recent-files-title">最近文件</h2>
-			<input
-				placeholder="搜索文件"
-				class="search-input"
-				v-model="searchQuery"
-				@input="searchFiles"
-				style="
-					margin-left: 10px;
-					opacity: 0.7;
-					width: 200px;
-					height: 36px;
-					border: 1px solid black;
-					border-radius: 3px;
-					margin-right: 3px;
-				"
-			/>
-			<n-button @click="addNewItem" type="primary">
-				<Icon icon="teenyicons:add-solid" />
-			</n-button>
+			<n-space align="center" justify="space-between" style="width: 100%">
+				<n-space align="center"
+					><h2 class="recent-files-title">最近文件</h2>
+					<input
+						placeholder="搜索文件"
+						class="search-input"
+						v-model="searchQuery"
+						@input="searchFiles"
+						style="
+							margin-left: 10px;
+							opacity: 0.7;
+							width: 200px;
+							height: 36px;
+							border: 1px solid black;
+							border-radius: 3px;
+						" />
+					<n-button @click="addNewItem" type="primary" class="add-button">
+						<Icon icon="teenyicons:add-solid" /> </n-button
+				></n-space>
+				<n-space
+					><n-button type="error" text @click="handleDelete">
+						<Icon icon="material-symbols:delete-sharp" /> 移动进回收站
+					</n-button>
+				</n-space>
+			</n-space>
 		</div>
 		<n-space vertical class="table-container">
-			<n-data-table :columns="columns" :data="tableData" :loading="loading" />
+			<n-data-table
+				:columns="columns"
+				:data="tableData"
+				:loading="loading"
+				:checked-row-keys="selectedKeys"
+				@update:checked-row-keys="handleSelectedKeysUpdate"
+				:rowKey="(row) => row.fileId"
+			/>
 
 			<!-- 重命名对话框 -->
 			<n-dialog class="rename" v-show="renameDialogVisible" title="重命名" :style="dialogStyle">
@@ -39,25 +52,6 @@
 					<n-space size="large">
 						<n-button @click="handleRenameConfirm" type="primary">确定</n-button>
 						<n-button @click="handleRenameCancel">取消</n-button>
-					</n-space>
-				</div>
-			</n-dialog>
-
-			<!-- 删除确认对话框 -->
-			<n-dialog
-				class="delete"
-				v-show="deleteDialogVisible"
-				title="确认删除"
-				:style="dialogStyle"
-				type="warning"
-			>
-				<div class="dialog-content">
-					<p>确认删除吗？</p>
-				</div>
-				<div class="dialog-footer">
-					<n-space size="large">
-						<n-button @click="handleDeleteConfirm" type="warning">删除</n-button>
-						<n-button @click="handleDeleteCancel">取消</n-button>
 					</n-space>
 				</div>
 			</n-dialog>
@@ -89,11 +83,13 @@ export default defineComponent({
 		const tableData = ref([])
 		const loading = ref(true)
 		const renameDialogVisible = ref(false)
-		const deleteDialogVisible = ref(false)
 		const selectedFile = ref(null)
 		const newFileName = ref('')
 		const searchQuery = ref('') // 用于存储搜索框的值
-
+		const selectedKeys = ref([])
+		const handleSelectedKeysUpdate = (keys) => {
+			selectedKeys.value = keys
+		}
 		const dialogStyle = {
 			width: '300px', // 对话框宽度
 			top: '50%', // 垂直居中
@@ -114,49 +110,42 @@ export default defineComponent({
 		}
 		const columns = [
 			{
+				type: 'selection',
+				key: 'selection',
+				size: 'medium',
+				fixed: 'left'
+			},
+			{
 				title: '文件名',
 				key: 'fileName',
+				ellipsis: {
+					tooltip: true
+				},
 				align: 'center',
 				render: (row) =>
-					h(
-						NPopover,
-						{
-							trigger: 'click',
-							placement: 'bottom',
-							showArrow: true,
-							vModel: (val) => {
-								row.popoverVisible = val
-							}
-						},
-						{
-							trigger: () =>
-								h(
-									'span',
-									{
-										class: 'file-name',
-										style:
-											'margin-right: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;',
-										onClick: () => handleFileClick(row)
-									},
-									row.fileName
-								),
-							default: () =>
-								h(NSpace, { vertical: true }, [
-									h(NButton, { size: 'small', text: 'true', onClick: handleRename }, () => [
-										h(Icon, { icon: 'ic:outline-drive-file-rename-outline' }),
-										'重命名'
-									]),
-									h(NButton, { size: 'small', text: 'true', onClick: handleDelete }, () => [
-										h(Icon, { icon: 'material-symbols:delete-sharp' }),
-										'删除文件'
-									]),
-									h(NButton, { size: 'small', text: 'true', onClick: handlePreview }, () => [
-										h(Icon, { icon: 'ph:eye-duotone' }),
-										'预览文件'
-									])
-								])
-						}
-					)
+					h('div', { style: 'display: flex; align-items: center; justify-content: center;' }, [
+						h(
+							'span',
+							{
+								class: 'file-name',
+								style:
+									'margin-right: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;',
+								onClick: () => handlePreview(row)
+							},
+							row.fileName
+						),
+						h(
+							NButton,
+							{
+								size: 'small',
+								type: 'primary',
+								style: 'margin-right: 8px;',
+								text: true,
+								onClick: () => handleRename(row)
+							},
+							() => h(Icon, { icon: 'ic:outline-drive-file-rename-outline' })
+						)
+					])
 			},
 			{
 				title: '创建时间',
@@ -171,10 +160,6 @@ export default defineComponent({
 				render: (row) => formatDate(row.fileUpdateTime)
 			}
 		]
-
-		const handleFileClick = (file) => {
-			selectedFile.value = file
-		}
 
 		//搜索文件
 		const searchFiles = () => {
@@ -261,9 +246,11 @@ export default defineComponent({
 		}
 
 		// 显示重命名对话框
-		const handleRename = () => {
+		const handleRename = (row) => {
+			selectedFile.value = row // 将当前行的数据存储到 selectedFile
 			renameDialogVisible.value = true
-			newFileName.value = selectedFile.value ? selectedFile.value.fileName : ''
+			newFileName.value = row.fileName // 设置新文件名为当前文件名
+			// newFileName.value = row.value ? row.value.fileName : ''
 		}
 
 		// 确认重命名操作
@@ -305,26 +292,23 @@ export default defineComponent({
 			newFileName.value = ''
 		}
 
-		// 显示删除确认对话框
-		const handleDelete = () => {
-			deleteDialogVisible.value = true
-		}
-
 		// 确认删除操作
-		const handleDeleteConfirm = () => {
-			if (!selectedFile.value) return
+		const handleDelete = () => {
+			if (selectedKeys.value.length === 0) {
+				alert('请选择要删除的文件')
+				return
+			}
 
 			$.ajax({
 				url: 'http://192.168.0.129:8083/TextEditor/user/removeFile',
 				type: 'POST',
 				contentType: 'application/json',
-				data: JSON.stringify(selectedFile.value.fileId),
+				data: JSON.stringify(selectedKeys.value),
 				dataType: 'json',
 				success: (response) => {
 					if (response.code === 200) {
 						fetchData()
-						deleteDialogVisible.value = false
-						selectedFile.value = null
+						selectedKeys.value = [] // 清空选中项
 					} else {
 						console.error('删除失败:', response.message)
 					}
@@ -339,17 +323,32 @@ export default defineComponent({
 			})
 		}
 
-		// 取消删除操作
-		const handleDeleteCancel = () => {
-			deleteDialogVisible.value = false
-			selectedFile.value = null
-		}
-
 		// 文件预览
-		const handlePreview = () => {
-			console.log('selectedFile.value.fileId', selectedFile.value.fileId)
-			store.commit('setSelectedItemKey', selectedFile.value.fileId)
+		const handlePreview = (row) => {
+			console.log('selectedFile.value.fileId', row.fileId)
+			store.commit('setSelectedItemKey', row.fileId)
 			router.push('/home/edit')
+			// $.ajax({
+			// 	url: 'http://192.168.0.129:8083/TextEditor/user/getFileInfo',
+			// 	type: 'POST',
+			// 	contentType: 'application/json',
+			// 	data: JSON.stringify(row.fileId),
+			// 	success: function (response) {
+			// 		if (response.code === 200) {
+			// 			currentFileContent.value = response.data
+			// 			store.commit('setUserText', {
+			// 				fileId: row.fileId,
+			// 				text: currentFileContent.value
+			// 			})
+			// 			console.log('currentFileContent.value', currentFileContent.value)
+			// 		} else {
+			// 			console.error('获取文件内容时出错:', response.message)
+			// 		}
+			// 	},
+			// 	error: function (error) {
+			// 		console.error('获取文件内容失败:', error)
+			// 	}
+			// })
 		}
 
 		// Mounted
@@ -362,17 +361,17 @@ export default defineComponent({
 			loading,
 			columns,
 			renameDialogVisible,
-			deleteDialogVisible,
 			dialogStyle,
 			inputStyle,
 			handleRenameConfirm,
 			handleRenameCancel,
-			handleDeleteConfirm,
-			handleDeleteCancel,
+			handleSelectedKeysUpdate,
+			handleDelete,
 			addNewItem,
 			searchQuery,
 			newFileName,
-			searchFiles
+			searchFiles,
+			selectedKeys
 		}
 	}
 })
@@ -394,6 +393,11 @@ export default defineComponent({
 	border-bottom: 1px solid #e9ecef;
 	display: flex;
 	align-items: center;
+}
+.add-button {
+	margin-left: -10px; /* Reduced margin to close gap */
+	height: 36px;
+	line-height: 36px; /* Ensure text alignment inside the button */
 }
 
 .table-container {

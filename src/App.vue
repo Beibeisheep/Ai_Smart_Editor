@@ -16,7 +16,7 @@ import NavBar from './components/NavBar.vue'
 const route = useRoute()
 
 // 定义需要隐藏 NavBar 的路径
-const hideNavBarPaths = ['/home/edit']
+const hideNavBarPaths = ['/home/edit', '/contact-us', '/preview']
 
 // 判断当前路径是否应该隐藏 NavBar
 const ShowNavBar = computed(() => {

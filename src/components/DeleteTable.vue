@@ -4,14 +4,29 @@
 		<div class="navbar">
 			<n-space align="center" justify="space-between" style="width: 100%">
 				<h2 class="recycle-bin-title">回收站</h2>
-				<n-button type="error" text @click="showClearConfirm">
-					<Icon icon="ic:outline-delete" /> 清空回收站
-				</n-button>
+				<n-space>
+					<n-button type="success" text @click="handleRestoreMultiple">
+						<Icon icon="ic:outline-restore-from-trash" /> 恢复选中文件
+					</n-button>
+					<n-button type="error" text @click="handleDeleteMultiple">
+						<Icon icon="material-symbols:delete-sharp" /> 彻底删除选中文件
+					</n-button>
+					<n-button type="error" text @click="showClearConfirm">
+						<Icon icon="ic:outline-delete" /> 清空回收站
+					</n-button>
+				</n-space>
 			</n-space>
 		</div>
 		<!-- 数据表格 -->
 		<n-space vertical class="table-container">
-			<n-data-table :columns="columns" :data="tableData" :loading="loading" />
+			<n-data-table
+				:columns="columns"
+				:data="tableData"
+				:loading="loading"
+				:checked-row-keys="selectedKeys"
+				@update:checked-row-keys="handleSelectedKeysUpdate"
+				:rowKey="(row) => row.fileId"
+			/>
 		</n-space>
 
 		<!-- 清空回收站确认对话框 -->
@@ -33,24 +48,6 @@
 			</div>
 		</n-dialog>
 
-		<!-- 恢复确认对话框 -->
-		<n-dialog
-			class="restore"
-			v-show="restoreDialogVisible"
-			title="确认恢复文件"
-			:style="dialogStyle"
-		>
-			<div class="dialog-content">
-				<p>确认恢复此文件吗？</p>
-			</div>
-			<div class="dialog-footer">
-				<n-space size="large">
-					<n-button @click="handleRestoreConfirm" type="primary">确认</n-button>
-					<n-button @click="handleRestoreCancel">取消</n-button>
-				</n-space>
-			</div>
-		</n-dialog>
-
 		<!-- 删除确认对话框 -->
 		<n-dialog
 			class="delete"
@@ -60,7 +57,7 @@
 			type="warning"
 		>
 			<div class="dialog-content">
-				<p>确认彻底删除此文件吗？</p>
+				<p>确认彻底删除所选文件吗？</p>
 			</div>
 			<div class="dialog-footer">
 				<n-space size="large">
@@ -73,9 +70,11 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, h } from 'vue'
+import { defineComponent, ref, onMounted, h, watch } from 'vue'
 import { NDataTable, NSpace, NButton, NDialog, NPopover } from 'naive-ui'
 import { Icon } from '@iconify/vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import $ from 'jquery'
 
 export default defineComponent({
@@ -89,12 +88,19 @@ export default defineComponent({
 	},
 	setup() {
 		const tableData = ref([])
+		const router = useRouter()
+		const store = useStore()
 		const loading = ref(true)
 		const clearDialogVisible = ref(false)
 		const restoreDialogVisible = ref(false)
 		const deleteDialogVisible = ref(false)
 		const selectedFile = ref(null)
+		const selectedKeys = ref([])
 
+		const handleSelectedKeysUpdate = (keys) => {
+			console.log('Selected keys updated:', keys)
+			selectedKeys.value = keys
+		}
 		const dialogStyle = {
 			width: '300px',
 			height: 'auto',
@@ -105,46 +111,28 @@ export default defineComponent({
 
 		const columns = [
 			{
+				type: 'selection',
+				key: 'selection',
+				size: 'medium',
+				fixed: 'left'
+			},
+			{
 				title: '文件名',
 				key: 'fileName',
+				ellipsis: {
+					tooltip: true
+				},
 				align: 'center',
 				render: (row) =>
 					h(
-						NPopover,
+						'span',
 						{
-							trigger: 'click',
-							placement: 'bottom',
-							showArrow: true,
-							vModel: (val) => {
-								row.popoverVisible = val
-							}
+							class: 'file-name',
+							style:
+								'margin-right: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;',
+							onClick: () => handlePreview(row)
 						},
-						{
-							trigger: () =>
-								h(
-									'span',
-									{
-										class: 'file-name',
-										style:
-											'margin-right: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;',
-										onClick: () => handleFileClick(row)
-									},
-									row.fileName
-								),
-							default: () =>
-								h(NSpace, { vertical: true }, [
-									h(
-										NButton,
-										{ size: 'small', text: 'true', onClick: () => handleRestore(row) },
-										() => [h(Icon, { icon: 'ic:outline-restore-from-trash' }), '恢复文件']
-									),
-									h(
-										NButton,
-										{ size: 'small', text: 'true', onClick: () => handleDelete(row) },
-										() => [h(Icon, { icon: 'material-symbols:delete-sharp' }), '彻底删除']
-									)
-								])
-						}
+						row.fileName
 					)
 			},
 			{
@@ -154,6 +142,7 @@ export default defineComponent({
 				render: (row) => formatDate(row.fileDeleteTime)
 			}
 		]
+
 		// 时间格式化函数
 		const formatDate = (dateString) => {
 			const options = {
@@ -168,9 +157,6 @@ export default defineComponent({
 			}
 			const date = new Date(dateString)
 			return date.toLocaleString(undefined, options).replace(',', '')
-		}
-		const handleFileClick = (file) => {
-			selectedFile.value = file
 		}
 
 		const fetchData = () => {
@@ -228,19 +214,14 @@ export default defineComponent({
 			clearDialogVisible.value = false
 		}
 
-		const handleRestore = (file) => {
-			selectedFile.value = file
-			restoreDialogVisible.value = true
-		}
-
-		const handleRestoreConfirm = () => {
-			if (!selectedFile.value) {
-				console.error('No file selected for restoration.')
+		const handleRestoreMultiple = () => {
+			if (!selectedKeys.value.length) {
+				console.error('No files selected for restoration.')
 				return
 			}
 
 			// Prepare the data as an array containing the file ID(s)
-			const fileIdsToRestore = [selectedFile.value.fileId]
+			const fileIdsToRestore = selectedKeys.value
 
 			$.ajax({
 				url: 'http://192.168.0.129:8083/TextEditor/user/recoverFile',
@@ -252,7 +233,7 @@ export default defineComponent({
 					if (response.code === 200) {
 						fetchData()
 						restoreDialogVisible.value = false
-						selectedFile.value = null
+						selectedKeys.value = [] // Clear selected keys after restore
 					} else {
 						console.error('恢复失败:', response.message)
 					}
@@ -263,24 +244,17 @@ export default defineComponent({
 			})
 		}
 
-		const handleRestoreCancel = () => {
-			restoreDialogVisible.value = false
-			selectedFile.value = null
-		}
-
-		const handleDelete = (file) => {
-			selectedFile.value = file
+		const handleDeleteMultiple = () => {
 			deleteDialogVisible.value = true
 		}
 
 		const handleDeleteConfirm = () => {
-			if (!selectedFile.value) {
-				console.error('No file selected for deletion.')
+			if (!selectedKeys.value.length) {
+				console.error('No files selected for deletion.')
 				return
 			}
 
-			// Prepare the data as an array containing the file ID(s)
-			const fileIdsToDelete = [selectedFile.value.fileId]
+			const fileIdsToDelete = selectedKeys.value
 
 			$.ajax({
 				url: 'http://192.168.0.129:8083/TextEditor/user/deleteFiles',
@@ -292,7 +266,7 @@ export default defineComponent({
 					if (response.code === 200) {
 						fetchData()
 						deleteDialogVisible.value = false
-						selectedFile.value = null
+						selectedKeys.value = [] // Clear selected keys after delete
 					} else {
 						console.error('删除失败:', response.message)
 					}
@@ -301,6 +275,10 @@ export default defineComponent({
 					console.error('删除时出错:', { xhr, status, error })
 				}
 			})
+		}
+		const handlePreview = (row) => {
+			store.commit('setSelectedItemKey', row.fileId) // 将文件ID存入Vuex
+			router.push('/preview') // 跳转到编辑页面
 		}
 
 		const handleDeleteCancel = () => {
@@ -311,7 +289,9 @@ export default defineComponent({
 		onMounted(() => {
 			fetchData()
 		})
-
+		watch(selectedKeys, (newKeys) => {
+			console.log('Selected keys changed:', newKeys)
+		})
 		return {
 			tableData,
 			loading,
@@ -323,13 +303,13 @@ export default defineComponent({
 			showClearConfirm,
 			handleClearConfirm,
 			handleClearCancel,
-			handleRestore,
-			handleRestoreConfirm,
-			handleRestoreCancel,
-			handleDelete,
+			handleRestoreMultiple,
+			handleDeleteMultiple,
 			handleDeleteConfirm,
 			handleDeleteCancel,
-			dialogStyle
+			dialogStyle,
+			handleSelectedKeysUpdate,
+			selectedKeys
 		}
 	}
 })
@@ -356,17 +336,6 @@ export default defineComponent({
 	flex: 1;
 	overflow: auto;
 }
-
-.file-name {
-	cursor: default;
-}
-
-.file-name:hover {
-	cursor: pointer;
-	text-decoration: underline;
-	color: #007bff;
-}
-
 .clear .dialog-content,
 .restore .dialog-content,
 .delete .dialog-content {
@@ -379,9 +348,11 @@ export default defineComponent({
 	display: flex;
 	justify-content: flex-end;
 }
+
 .recycle-bin-title {
 	color: rgba(0, 0, 0, 0.721);
 }
+
 .n-dialog {
 	position: fixed;
 	top: 50%;

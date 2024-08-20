@@ -30,7 +30,9 @@
 				</n-button>
 			</n-space>
 			<n-space style="margin-left: auto">
-				<n-button text style="color: white; margin-right: 30px">联系我们</n-button>
+				<router-link to="/contact-us">
+					<n-button text style="color: white; margin-right: 30px"> 联系我们 </n-button>
+				</router-link>
 				<n-button text style="color: white; padding-right: 20px"
 					>用户名: {{ $store.state.user.email }}</n-button
 				>
@@ -131,8 +133,10 @@ const renameDialogVisible = ref(false)
 const newFileName = ref('')
 const currentFileContent = ref('') // Reference for current file content
 const searchQuery = ref('') // 用于存储搜索框的值
+const fileContent = computed(() => store.getters['getUserText'](currentFileId.value))
+const shouldUpdateUserText = computed(() => store.getters['getShouldUpdateUserText'])
 const editText = ref('') // 文本编辑器内的实时数据
-const newFileContent = computed(() => store.getters['getAiText']) //Ai改过格式的数据
+const newFileContent = computed(() => store.getters['getAiText'](currentFileId.value)) //Ai改过格式的数据
 console.log('newFileContent)))AIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII', newFileContent.value)
 const dialogStyle = {
 	width: '300px', // 对话框宽度
@@ -191,6 +195,7 @@ const addNewItem = () => {
 		type: 'POST',
 		success: function (response) {
 			console.log('文件创建成功:', response)
+			store.commit('setSelectedItemKey', response.data.fileId)
 			fetchFileList() // 重新获取文件列表
 		},
 		error: function (error) {
@@ -238,10 +243,9 @@ const selectFile = (fileId) => {
 		success: function (response) {
 			if (response.code === 200) {
 				currentFileContent.value = response.data
+				store.commit('setUserText', { fileId: currentFileId.value, text: currentFileContent.value })
 				console.log('currentFileContent.value', currentFileContent.value)
-				vditor.value.setValue(currentFileContent.value) // Update Vditor with the file content
-				store.commit('setSelectedMenuKey', fileId)
-				store.commit('setUserText', currentFileContent.value)
+				console.log('fileContenttttttttttttttt', fileContent.value)
 			} else {
 				console.error('获取文件内容时出错:', response.message)
 			}
@@ -332,6 +336,7 @@ onMounted(() => {
 		height: document.getElementById('vditor-container').offsetHeight,
 		width: document.getElementById('vditor-container').offsetWidth,
 		cache: { enable: false },
+		mode: 'wysiwyg',
 		input: (value) => {
 			// 使用 `input` 回调函数监听内容变化
 			if (currentFileId.value) {
@@ -345,29 +350,53 @@ onMounted(() => {
 					}),
 					success: function (response) {
 						console.log('文件保存成功:', response)
+						store.commit('setUserText', {
+							fileId: currentFileId.value,
+							text: value
+						})
+						currentFileContent.value = value
 					},
 					error: function (error) {
 						console.error('文件保存失败:', error)
 					}
 				})
 			}
+		},
+		after() {
+			vditor.value.setValue(fileContent.value) // 使用 ref 包装的 vditor 实例
 		}
 	})
 })
-// const handleSonThingUpdate = (aiText) => {
-//   newFileContent.value = aiText;
-// };
+
 const handleSonThingUpdate = () => {
-	currentFileContent.value = newFileContent.value // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
-	vditor.value.setValue(currentFileContent.value) // 更新 Vditor 中的内容
+	if (shouldUpdateUserText.value) {
+		currentFileContent.value = newFileContent.value // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
+		vditor.value.setValue(currentFileContent.value, false) // 更新 Vditor 中的内容
+		$.ajax({
+			url: 'http://192.168.0.129:8083/TextEditor/user/saveFile',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				fileId: currentFileId.value,
+				fileContent: currentFileContent.value
+			}),
+			success: function (response) {
+				console.log('文件保存成功:', response)
+				store.commit('setUserText', { fileId: currentFileId.value, text: currentFileContent.value })
+			},
+			error: function (error) {
+				console.error('文件保存失败:', error)
+			}
+		})
+	}
+	store.commit('setShouldUpdateUserText', false)
+	store.commit('setAiText', {
+		//确保每次AiText都有改变
+		fileId: currentFileId.value,
+		text: ''
+	})
 }
 
-// setInterval(() => {
-//   const content = vditor.value
-//   if (content !== '' && content !== null && content !== undefined && content !== null) {
-//     console.log('vditor content:', content);
-//   }
-// }, 1000)
 // 监控 currentFileId 的变化
 watch(currentFileId, (newFileId, oldFileId) => {
 	if (newFileId !== oldFileId) {
@@ -375,9 +404,20 @@ watch(currentFileId, (newFileId, oldFileId) => {
 	}
 })
 
-watch(newFileContent, (newValue) => {
-	if (newValue) {
-		handleSonThingUpdate() // 当 newFileContent 改变时，自动更新 Vditor 内容
+// 监听 newFileContent 的变化
+// watch(newFileContent, (newValue) => {
+// 	if (newValue) {
+// 		handleSonThingUpdate()
+// 	}
+// })
+watch(newFileContent, () => handleSonThingUpdate())
+
+watch(fileContent, (newCotent) => {
+	const saveFileContent = fileContent.value
+	if (saveFileContent !== vditor.value.getValue()) {
+		console.log('vditor.value.getValue()', vditor.value.getValue())
+		console.log('fileContenttttttttttttttt', saveFileContent)
+		vditor.value.setValue(saveFileContent)
 	}
 })
 </script>
