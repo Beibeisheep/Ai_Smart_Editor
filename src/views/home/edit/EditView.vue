@@ -99,6 +99,17 @@
 			</n-space>
 		</div>
 	</n-dialog>
+	<n-dialog v-show="confirmDialogVisible" title="查错纠错" :style="dialogStyle">
+		<div class="dialog-content">
+			红色标注内容表示为表示原始文本中的不正确或需要纠正的部分，黄色标注内容为对错误内容的修正建议，请问进行内容更改吗
+		</div>
+		<div class="dialog-footer">
+			<n-space size="large">
+				<n-button @click="acceptChanges" type="primary">接受更改</n-button>
+				<n-button @click="rejectChanges">拒绝更改</n-button>
+			</n-space>
+		</div>
+	</n-dialog>
 </template>
 
 <script setup>
@@ -122,7 +133,7 @@ import {
 	NDialog
 } from 'naive-ui'
 import $ from 'jquery'
-
+import { diffWordsWithSpace } from 'diff'
 const router = useRouter()
 const store = useStore()
 const fileItems = ref([])
@@ -133,6 +144,7 @@ const renameDialogVisible = ref(false)
 const newFileName = ref('')
 const currentFileContent = ref('') // Reference for current file content
 const searchQuery = ref('') // 用于存储搜索框的值
+const confirmDialogVisible = ref(false)
 const fileContent = computed(() => store.getters['getUserText'](currentFileId.value))
 const shouldUpdateUserText = computed(() => store.getters['getShouldUpdateUserText'])
 const editText = ref('') // 文本编辑器内的实时数据
@@ -178,6 +190,22 @@ const menuOptions = computed(() => {
 			)
 	}))
 })
+const diffHtml = ref('')
+
+const compareTexts = () => {
+	const oldText = fileContent.value
+	const newText = newFileContent.value
+	const diff = diffWordsWithSpace(oldText, newText)
+	diffHtml.value = diff
+		.map((part) => {
+			const color = part.added ? 'background-color: yellow;' : part.removed ? 'color: red;' : ''
+			return `<span style="${color}">${part.value}</span>`
+		})
+		.join('')
+
+	// Set the diffHtml content directly to the editor
+	vditor.value.setValue(diffHtml.value, false)
+}
 
 const toggleDropdown = () => {
 	dropdownOpen.value = !dropdownOpen.value
@@ -328,6 +356,7 @@ const handleRenameCancel = () => {
 	renameDialogVisible.value = false
 	newFileName.value = ''
 }
+
 onMounted(() => {
 	fetchFileList() // 获取文件列表
 	if (currentFileId.value) {
@@ -337,7 +366,7 @@ onMounted(() => {
 		height: document.getElementById('vditor-container').offsetHeight,
 		width: document.getElementById('vditor-container').offsetWidth,
 		cache: { enable: false },
-		mode: 'wysiwyg',
+		mode: 'sv',
 		input: (value) => {
 			// 使用 `input` 回调函数监听内容变化
 			if (currentFileId.value) {
@@ -369,33 +398,51 @@ onMounted(() => {
 	})
 })
 
-const handleSonThingUpdate = () => {
-	if (shouldUpdateUserText.value) {
-		currentFileContent.value = newFileContent.value // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
-		vditor.value.setValue(currentFileContent.value, false) // 更新 Vditor 中的内容
-		$.ajax({
-			url: 'http://192.168.0.129:8083/TextEditor/user/saveFile',
-			type: 'POST',
-			contentType: 'application/json',
-			data: JSON.stringify({
-				fileId: currentFileId.value,
-				fileContent: currentFileContent.value
-			}),
-			success: function (response) {
-				console.log('文件保存成功:', response)
-				store.commit('setUserText', { fileId: currentFileId.value, text: currentFileContent.value })
-			},
-			error: function (error) {
-				console.error('文件保存失败:', error)
-			}
-		})
-	}
+const acceptChanges = () => {
+	currentFileContent.value = newFileContent.value // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
+	vditor.value.setValue(currentFileContent.value, false) // 更新 Vditor 中的内容
+	$.ajax({
+		url: 'http://192.168.0.129:8083/TextEditor/user/saveFile',
+		type: 'POST',
+		contentType: 'application/json',
+		data: JSON.stringify({
+			fileId: currentFileId.value,
+			fileContent: currentFileContent.value
+		}),
+		success: function (response) {
+			console.log('文件保存成功:', response)
+			store.commit('setUserText', { fileId: currentFileId.value, text: currentFileContent.value })
+			confirmDialogVisible.value = false
+		},
+		error: function (error) {
+			console.error('文件保存失败:', error)
+		}
+	})
 	store.commit('setShouldUpdateUserText', false)
 	store.commit('setAiText', {
 		//确保每次AiText都有改变
 		fileId: currentFileId.value,
 		text: ''
 	})
+}
+
+const rejectChanges = () => {
+	vditor.value.setValue(fileContent.value, false)
+	confirmDialogVisible.value = false
+	store.commit('setShouldUpdateUserText', false)
+	store.commit('setAiText', {
+		//确保每次AiText都有改变
+		fileId: currentFileId.value,
+		text: ''
+	})
+}
+const handleSonThingUpdate = () => {
+	if (shouldUpdateUserText.value) {
+		compareTexts()
+		if (diffHtml.value) {
+			confirmDialogVisible.value = true
+		}
+	}
 }
 
 // 监控 currentFileId 的变化
