@@ -164,7 +164,7 @@ export default defineComponent({
 
 		const fetchData = () => {
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/getRecycleBinFileInfo',
+				url: 'http://192.168.0.129:8083/TextEditor/file/getRecycleBinFileInfo',
 				type: 'POST',
 				dataType: 'json',
 				success: (response) => {
@@ -186,7 +186,7 @@ export default defineComponent({
 			const fileIds = tableData.value.map((file) => file.fileId) // 假设文件 ID 存储在 `id` 字段中
 
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/deleteFiles',
+				url: 'http://192.168.0.129:8083/TextEditor/file/deleteFiles',
 				type: 'POST',
 				dataType: 'json',
 				contentType: 'application/json',
@@ -230,7 +230,7 @@ export default defineComponent({
 			const fileIdsToRestore = selectedKeys.value
 
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/recoverFile',
+				url: 'http://192.168.0.129:8083/TextEditor/file/recoverFile',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify(fileIdsToRestore),
@@ -266,7 +266,7 @@ export default defineComponent({
 			const fileIdsToDelete = selectedKeys.value
 
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/deleteFiles',
+				url: 'http://192.168.0.129:8083/TextEditor/file/deleteFiles',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify(fileIdsToDelete),

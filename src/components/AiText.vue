@@ -247,7 +247,7 @@ const sendMessage = async () => {
 			}
 		],
 		top_p: 1,
-		prompt: userText.value, // 这里是给ai提供的上下文，也就是文本编辑器内的信息，但是userText拿不到实时的值。如果能拿到就可以放出来
+		// prompt: userText.value, // 这里是给ai提供的上下文，也就是文本编辑器内的信息，但是userText拿不到实时的值。如果能拿到就可以放出来
 		max_tokens: 1000,
 		temperature: 0.6
 	}
@@ -262,9 +262,10 @@ const sendMessage = async () => {
 			text: response.data.choices[0].message.content
 		}
 		chatHistory.value.push(assistantMessage)
-		userInput.value = '' // 清空用户输入框
+		;(userInput.value = ''), // 清空用户输入框
+			(window as any).$message.success('操作成功')
 	} catch (error) {
-		console.error('Error sending message:', error)
+		console.error('Error sending message:', error), (window as any).$message.error('操作失败')
 	}
 }
 
@@ -313,9 +314,10 @@ const AiTypesetting = async () => {
 		store.commit('setAiText', {
 			fileId: currentFileId.value,
 			text: response.data.choices[0].message.content
-		})
+		}),
+			(window as any).$message.success('操作成功')
 	} catch (error) {
-		console.error('Error during typesetting:', error)
+		console.error('Error during typesetting:', error), (window as any).$message.error('操作失败')
 	}
 }
 
@@ -369,12 +371,14 @@ const AiCorrection = async () => {
 			response.data.choices[0].message.content
 		)
 		store.commit('setShouldUpdateUserText', true)
+		store.commit('setShouldconfirmDialogVisible', true)
 		store.commit('setAiText', {
 			fileId: currentFileId.value,
 			text: response.data.choices[0].message.content
-		})
+		}),
+			(window as any).$message.success('操作成功')
 	} catch (error) {
-		console.error('Error during correction:', error)
+		console.error('Error during correction:', error), (window as any).$message.error('操作失败')
 	}
 }
 
@@ -385,6 +389,9 @@ const handleOneKeyCorrection = async () => {
 	console.log('??????????????//', userText)
 	router.push('/home/edit')
 }
+watch(userInput, (newValue) => {
+	console.log('userInput 更新为:', newValue)
+})
 </script>
 
 <style scoped>
@@ -457,30 +464,32 @@ const handleOneKeyCorrection = async () => {
 	display: flex;
 	align-items: center;
 	position: relative;
+	width: 100%; /* 确保输入框和按钮在父容器内 */
 }
 
 .iptbox input {
-	width: 85%; /* 使用百分比宽度 */
+	flex: 1; /* 确保输入框占据剩余空间 */
+	min-width: 300px;
 	height: 40px;
-	padding-left: 10px; /* 增加内边距 */
-	padding-right: 70px; /* 增加内边距 */
+	padding-left: 10px;
+	padding-right: 10px; /* 保留适当的内边距 */
 	border-radius: 10px;
-	border: 1px solid #ccc; /* 添加边框 */
+	border: 1px solid #ccc;
+	margin-right: 0; /* 去除与按钮的间距 */
+	box-sizing: border-box; /* 确保 padding 和 border 不会影响 width */
+	margin-left: 50px;
 }
 
 .iptbox button {
 	width: 60px;
-	height: 35px;
-	position: absolute;
-	right: 5px; /* 增加位置调整 */
-	top: 5px;
+	height: 40px; /* 使按钮与输入框高度一致 */
 	border-radius: 10px;
 	border: none;
 	background-color: #707070;
 	color: #fff;
 	font-weight: 600;
+	margin-left: 10px; /* 增加按钮与输入框之间的间距 */
 }
-
 .chat-modal {
 	position: fixed;
 	top: 50%;

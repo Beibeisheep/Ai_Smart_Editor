@@ -2,7 +2,8 @@ const text = {
 	state: () => ({
 		// 使用对象存储每个文件的文本
 		files: {},
-		shouldUpdateUserText: false // 默认值为 false
+		shouldUpdateUserText: false, // 默认值为 false
+		ShouldconfirmDialogVisible: false
 	}),
 	mutations: {
 		setAiText(state, { fileId, text }) {
@@ -21,6 +22,9 @@ const text = {
 		},
 		setShouldUpdateUserText(state, value) {
 			state.shouldUpdateUserText = value
+		},
+		setShouldconfirmDialogVisible(state, value) {
+			state.ShouldconfirmDialogVisible = value
 		}
 	},
 	getters: {
@@ -34,6 +38,9 @@ const text = {
 		},
 		getShouldUpdateUserText: (state) => {
 			return state.shouldUpdateUserText
+		},
+		getShouldconfirmDialogVisible: (state) => {
+			return state.ShouldconfirmDialogVisible
 		}
 	}
 }

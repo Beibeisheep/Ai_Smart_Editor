@@ -41,7 +41,7 @@ export default defineComponent({
 		const createFile = () => {
 			console.log('创建了一个文件')
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/createFile',
+				url: 'http://192.168.0.129:8083/TextEditor/file/createFile',
 				type: 'POST',
 				success: function (response) {
 					console.log('文件创建成功:', response)
