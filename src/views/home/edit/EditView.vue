@@ -146,6 +146,7 @@ const currentFileContent = ref('') // Reference for current file content
 const searchQuery = ref('') // 用于存储搜索框的值
 const confirmDialogVisible = ref(false)
 const ShouldconfirmDialogVisible = computed(() => store.getters['getShouldconfirmDialogVisible'])
+const ShouldUpdateAIContinuation = computed(() => store.getters['getShouldUpdateAIContinuation'])
 const fileContent = computed(() => store.getters['getUserText'](currentFileId.value))
 const shouldUpdateUserText = computed(() => store.getters['getShouldUpdateUserText'])
 const editText = ref('') // 文本编辑器内的实时数据
@@ -450,6 +451,45 @@ const handleSonThingUpdate = () => {
 			} else {
 				window.$message.success('没有发现错误')
 			}
+		} else if (ShouldUpdateAIContinuation.value) {
+			//实现Ai续写
+
+			// 去除重复的部分
+			if (currentFileContent.value.includes(newFileContent.value)) {
+				const startIndex = currentFileContent.value.indexOf(newFileContent.value)
+				currentFileContent.value = currentFileContent.value.slice(0, startIndex)
+			}
+			console.log('currentFileContent.valueeeeeeeeeee', currentFileContent.value)
+			console.log('newFileContent.valueeeeeeeeeeeeeee', newFileContent.value)
+			currentFileContent.value += newFileContent.value // 将 newFileContent(AI改过的) 的内容追加到 currentFileContent（展示的）
+
+			vditor.value.setValue(currentFileContent.value, false) // 更新 Vditor 中的内容
+			$.ajax({
+				url: 'http://192.168.0.129:8083/TextEditor/file/saveFile',
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify({
+					fileId: currentFileId.value,
+					fileContent: currentFileContent.value
+				}),
+				success: function (response) {
+					console.log('文件保存成功:', response)
+					store.commit('setUserText', {
+						fileId: currentFileId.value,
+						text: currentFileContent.value
+					})
+				},
+				error: function (error) {
+					console.error('文件保存失败:', error)
+				}
+			})
+			store.commit('setShouldUpdateUserText', false)
+			store.commit('setShouldUpdateAIContinuation', false)
+			store.commit('setAiText', {
+				//确保每次AiText都有改变
+				fileId: currentFileId.value,
+				text: ''
+			})
 		} else {
 			//实现一键排版
 			currentFileContent.value = newFileContent.value // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
