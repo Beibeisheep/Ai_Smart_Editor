@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 
 const menuKey = {
 	state: () => ({
-		selectedMenuKey: '最近文件' // 默认值
+		selectedMenuKey: '最近文档' // 默认值
 	}),
 	mutations: {
 		setSelectedMenuKey(state, key) {

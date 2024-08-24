@@ -26,7 +26,7 @@ export default defineComponent({
 		const selectedKey = computed(() => store.getters['getSelectedMenuKey'])
 		console.log('selectedKeyyyyyyyyyyyyyyyy', selectedKey)
 		const menuItems = [
-			{ label: '最近文件', path: '/recent-files' },
+			{ label: '最近文档', path: '/recent-files' },
 			{ label: '回收站', path: '/recycle-bin' }
 		]
 
@@ -39,17 +39,17 @@ export default defineComponent({
 		)
 
 		const createFile = () => {
-			console.log('创建了一个文件')
+			console.log('创建了一个文档')
 			$.ajax({
 				url: 'http://192.168.0.129:8083/TextEditor/file/createFile',
 				type: 'POST',
 				success: function (response) {
-					console.log('文件创建成功:', response)
+					console.log('文档创建成功:', response)
 					store.commit('setSelectedItemKey', response.data.fileId)
 					router.push('/home/edit')
 				},
 				error: function (error) {
-					console.error('文件创建失败:', error)
+					console.error('文档创建失败:', error)
 					window.$message.error('创建失败')
 				}
 			})

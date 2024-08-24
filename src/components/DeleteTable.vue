@@ -5,14 +5,14 @@
 			<n-space align="center" justify="space-between" style="width: 100%">
 				<n-space align="center"
 					><h2 class="recycle-bin-title">回收站</h2>
-					<h4 class="recycle-bin-content">文件保留 7 天后将彻底删除</h4></n-space
+					<h4 class="recycle-bin-content">文档保留 7 天后将彻底删除</h4></n-space
 				>
 				<n-space>
 					<n-button type="success" text @click="handleRestoreMultiple">
-						<Icon icon="ic:outline-restore-from-trash" /> 恢复选中文件
+						<Icon icon="ic:outline-restore-from-trash" /> 恢复选中文档
 					</n-button>
 					<n-button type="error" text @click="handleDeleteMultiple">
-						<Icon icon="material-symbols:delete-sharp" /> 彻底删除选中文件
+						<Icon icon="material-symbols:delete-sharp" /> 彻底删除选中文档
 					</n-button>
 					<n-button type="error" text @click="showClearConfirm">
 						<Icon icon="ic:outline-delete" /> 清空回收站
@@ -41,7 +41,7 @@
 			type="warning"
 		>
 			<div class="dialog-content">
-				<p>所有文件将彻底删除，无法恢复，是否继续？</p>
+				<p>所有文档将彻底删除，无法恢复，是否继续？</p>
 			</div>
 			<div class="dialog-footer">
 				<n-space size="large">
@@ -60,7 +60,7 @@
 			type="warning"
 		>
 			<div class="dialog-content">
-				<p>确认彻底删除所选文件吗？</p>
+				<p>确认彻底删除所选文档吗？</p>
 			</div>
 			<div class="dialog-footer">
 				<n-space size="large">
@@ -120,7 +120,7 @@ export default defineComponent({
 				fixed: 'left'
 			},
 			{
-				title: '文件名',
+				title: '文档名',
 				key: 'fileName',
 				ellipsis: {
 					tooltip: true
@@ -183,7 +183,7 @@ export default defineComponent({
 		}
 
 		const deleteAllFiles = () => {
-			const fileIds = tableData.value.map((file) => file.fileId) // 假设文件 ID 存储在 `id` 字段中
+			const fileIds = tableData.value.map((file) => file.fileId) // 假设文档 ID 存储在 `id` 字段中
 
 			$.ajax({
 				url: 'http://192.168.0.129:8083/TextEditor/file/deleteFiles',
@@ -222,7 +222,7 @@ export default defineComponent({
 
 		const handleRestoreMultiple = () => {
 			if (!selectedKeys.value.length) {
-				window.$message.warning('未选择文件')
+				window.$message.warning('未选择文档')
 				return
 			}
 
@@ -255,7 +255,7 @@ export default defineComponent({
 
 		const handleDeleteMultiple = () => {
 			if (!selectedKeys.value.length) {
-				window.$message.warning('未选择文件')
+				window.$message.warning('未选择文档')
 				return
 			}
 
@@ -289,7 +289,7 @@ export default defineComponent({
 			})
 		}
 		const handlePreview = (row) => {
-			store.commit('setSelectedItemKey', row.fileId) // 将文件ID存入Vuex
+			store.commit('setSelectedItemKey', row.fileId) // 将文档ID存入Vuex
 			router.push('/preview') // 跳转到编辑页面
 		}
 

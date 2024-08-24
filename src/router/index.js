@@ -7,6 +7,7 @@ import RecentFiles from '../views/menu/RecentFiles.vue'
 import RecycleBin from '../views/menu/RecycleBin.vue'
 import ContactView from '../views/home/ContactView.vue'
 import PreviewVditor from '@/views/home/PreviewVditor.vue'
+import ChangePasswordView from '@/views/user/account/ChangePasswordView.vue'
 import store from '@/stores'
 // const router = createRouter({
 //   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,6 +42,11 @@ const routes = [
 		path: '/contact-us',
 		name: 'ContactView',
 		component: ContactView // 对应的组件
+	},
+	{
+		path: '/change-password',
+		name: 'ChangePasswordView',
+		component: ChangePasswordView
 	},
 	{
 		path: '/preview',

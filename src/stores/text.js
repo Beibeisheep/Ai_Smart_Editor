@@ -1,6 +1,6 @@
 const text = {
 	state: () => ({
-		// 使用对象存储每个文件的文本
+		// 使用对象存储每个文档的文本
 		files: {},
 		shouldUpdateUserText: false, // 默认值为 false
 		ShouldconfirmDialogVisible: false,

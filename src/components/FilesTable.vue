@@ -4,9 +4,9 @@
 		<div class="navbar">
 			<n-space align="center" justify="space-between" style="width: 100%">
 				<n-space align="center"
-					><h2 class="recent-files-title">最近文件</h2>
+					><h2 class="recent-files-title">最近文档</h2>
 					<input
-						placeholder="搜索文件"
+						placeholder="搜索文档"
 						class="search-input"
 						v-model="searchQuery"
 						@input="searchFiles"
@@ -44,7 +44,7 @@
 					<input
 						type="text"
 						v-model="newFileName"
-						placeholder="输入新的文件名"
+						placeholder="输入新的文档名"
 						:style="inputStyle"
 					/>
 				</div>
@@ -116,7 +116,7 @@ export default defineComponent({
 				fixed: 'left'
 			},
 			{
-				title: '文件名',
+				title: '文档名',
 				key: 'fileName',
 				ellipsis: {
 					tooltip: true
@@ -161,10 +161,10 @@ export default defineComponent({
 			}
 		]
 
-		//搜索文件
+		//搜索文档
 		const searchFiles = () => {
 			if (searchQuery.value.trim() === '') {
-				fetchData() // 如果搜索框为空，则重新获取所有文件
+				fetchData() // 如果搜索框为空，则重新获取所有文档
 				return
 			}
 			$.ajax({
@@ -181,11 +181,11 @@ export default defineComponent({
 							fileUpdateTime: file.fileUpdateTime
 						}))
 					} else {
-						console.error('搜索文件时出错:', response.message)
+						console.error('搜索文档时出错:', response.message)
 					}
 				},
 				error: function (error) {
-					console.error('搜索文件失败:', error)
+					console.error('搜索文档失败:', error)
 				}
 			})
 		}
@@ -195,12 +195,12 @@ export default defineComponent({
 				url: 'http://192.168.0.129:8083/TextEditor/file/createFile',
 				type: 'POST',
 				success: function (response) {
-					console.log('文件创建成功:', response)
+					console.log('文档创建成功:', response)
 					window.$message.success('创建成功')
-					fetchData() // 重新获取文件列表
+					fetchData() // 重新获取文档列表
 				},
 				error: function (error) {
-					console.error('文件创建失败:', error)
+					console.error('文档创建失败:', error)
 					window.$message.error('创建失败')
 				}
 			})
@@ -251,7 +251,7 @@ export default defineComponent({
 		const handleRename = (row) => {
 			selectedFile.value = row // 将当前行的数据存储到 selectedFile
 			renameDialogVisible.value = true
-			newFileName.value = row.fileName // 设置新文件名为当前文件名
+			newFileName.value = row.fileName // 设置新文档名为当前文档名
 			// newFileName.value = row.value ? row.value.fileName : ''
 		}
 
@@ -260,7 +260,7 @@ export default defineComponent({
 			console.log('FIleName', newFileName.value)
 			console.log('searchQuery.value.trim()', newFileName.value.trim())
 			if (!newFileName.value.trim()) {
-				window.$message.error('文件名不能为空')
+				window.$message.error('文档名不能为空')
 				return
 			}
 
@@ -297,7 +297,7 @@ export default defineComponent({
 		// 移动进回收站操作
 		const handleDelete = () => {
 			if (selectedKeys.value.length === 0) {
-				window.$message.warning('未选择文件')
+				window.$message.warning('未选择文档')
 				return
 			}
 
@@ -327,7 +327,7 @@ export default defineComponent({
 			})
 		}
 
-		// 文件预览
+		// 文档预览
 		const handlePreview = (row) => {
 			console.log('selectedFile.value.fileId', row.fileId)
 			store.commit('setSelectedItemKey', row.fileId)
@@ -346,11 +346,11 @@ export default defineComponent({
 			// 			})
 			// 			console.log('currentFileContent.value', currentFileContent.value)
 			// 		} else {
-			// 			console.error('获取文件内容时出错:', response.message)
+			// 			console.error('获取文档内容时出错:', response.message)
 			// 		}
 			// 	},
 			// 	error: function (error) {
-			// 		console.error('获取文件内容失败:', error)
+			// 		console.error('获取文档内容失败:', error)
 			// 	}
 			// })
 		}

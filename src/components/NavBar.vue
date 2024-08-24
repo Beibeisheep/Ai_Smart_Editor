@@ -12,9 +12,18 @@
 									{{ $store.state.user.email }}
 								</n-button>
 							</template>
-							<n-dropdown-item @click="logout" :style="{ cursor: 'pointer' }"
-								>退出登录</n-dropdown-item
-							>
+							<n-dropdown-menu>
+								<n-dropdown-item
+									@click="ChangePassword"
+									:style="{ cursor: 'pointer', marginRight: '4px' }"
+								>
+									修改密码
+								</n-dropdown-item>
+
+								<n-dropdown-item @click="logout" :style="{ cursor: 'pointer' }">
+									退出登录
+								</n-dropdown-item>
+							</n-dropdown-menu>
 						</n-dropdown>
 					</template>
 
@@ -54,8 +63,11 @@ export default {
 			store.dispatch('logout')
 			router.push({ name: 'LoginView' })
 		}
-
+		const ChangePassword = () => {
+			router.push({ name: 'ChangePasswordView' })
+		}
 		return {
+			ChangePassword,
 			logout,
 			route_name
 		}

@@ -44,7 +44,7 @@
 				<div class="sidebar">
 					<div style="display: flex; align-items: center; margin-bottom: 20px">
 						<input
-							placeholder="搜索文件"
+							placeholder="搜索文档"
 							style="
 								opacity: 0.7;
 								flex: 1;
@@ -90,7 +90,7 @@
 	<!-- 重命名对话框 -->
 	<n-dialog v-show="renameDialogVisible" title="重命名" :style="dialogStyle">
 		<div class="dialog-content">
-			<input type="text" v-model="newFileName" placeholder="输入新的文件名" :style="inputStyle" />
+			<input type="text" v-model="newFileName" placeholder="输入新的文档名" :style="inputStyle" />
 		</div>
 		<div class="dialog-footer">
 			<n-space size="large">
@@ -171,7 +171,7 @@ const inputStyle = {
 	boxSizing: 'border-box'
 }
 const collapseTitle = computed(() => {
-	return dropdownOpen.value ? '所有文件 - ' : '所有文件'
+	return dropdownOpen.value ? '所有文档 - ' : '所有文档'
 })
 const menuOptions = computed(() => {
 	return fileItems.value.map((file) => ({
@@ -224,13 +224,13 @@ const addNewItem = () => {
 		// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
 		type: 'POST',
 		success: function (response) {
-			console.log('文件创建成功:', response)
+			console.log('文档创建成功:', response)
 			window.$message.success('创建成功')
 			store.commit('setSelectedItemKey', response.data.fileId)
-			fetchFileList() // 重新获取文件列表
+			fetchFileList() // 重新获取文档列表
 		},
 		error: function (error) {
-			console.error('文件创建失败:', error)
+			console.error('文档创建失败:', error)
 		}
 	})
 }
@@ -278,18 +278,18 @@ const selectFile = (fileId) => {
 				console.log('currentFileContent.value', currentFileContent.value)
 				console.log('fileContenttttttttttttttt', fileContent.value)
 			} else {
-				console.error('获取文件内容时出错:', response.message)
+				console.error('获取文档内容时出错:', response.message)
 			}
 		},
 		error: function (error) {
-			console.error('获取文件内容失败:', error)
+			console.error('获取文档内容失败:', error)
 		}
 	})
 }
-//搜索文件
+//搜索文档
 const searchFiles = () => {
 	if (searchQuery.value.trim() === '') {
-		fetchFileList() // 如果搜索框为空，则重新获取所有文件
+		fetchFileList() // 如果搜索框为空，则重新获取所有文档
 		return
 	}
 	console.log('FIleName', searchQuery.value)
@@ -301,17 +301,17 @@ const searchFiles = () => {
 		data: JSON.stringify(searchQuery.value.trim()), // 传递搜索参数
 		success: function (response) {
 			if (response.code === 200) {
-				// 更新文件列表
+				// 更新文档列表
 				fileItems.value = response.data.map((file) => ({
 					fileId: file.fileId,
 					fileName: file.fileName
 				}))
 			} else {
-				console.error('搜索文件时出错:', response.message)
+				console.error('搜索文档时出错:', response.message)
 			}
 		},
 		error: function (error) {
-			console.error('搜索文件失败:', error)
+			console.error('搜索文档失败:', error)
 		}
 	})
 }
@@ -325,7 +325,7 @@ const handleRename = (file) => {
 // 确认重命名操作
 const handleRenameConfirm = () => {
 	if (!newFileName.value.trim()) {
-		alert('文件名不能为空')
+		alert('文档名不能为空')
 		return
 	}
 	console.log('renameDialogVisible.valuuuuuuuuuuuuuuuuuuuuuuue', renameDialogVisible.value)
@@ -340,7 +340,7 @@ const handleRenameConfirm = () => {
 		dataType: 'json',
 		success: (response) => {
 			if (response.code === 200) {
-				fetchFileList() // 更新文件列表
+				fetchFileList() // 更新文档列表
 				renameDialogVisible.value = false
 				newFileName.value = ''
 			} else {
@@ -360,7 +360,7 @@ const handleRenameCancel = () => {
 }
 
 onMounted(() => {
-	fetchFileList() // 获取文件列表
+	fetchFileList() // 获取文档列表
 	if (currentFileId.value) {
 		selectFile(currentFileId.value) // Load the selected file content
 	}
@@ -381,7 +381,7 @@ onMounted(() => {
 						fileContent: value
 					}),
 					success: function (response) {
-						console.log('文件保存成功:', response)
+						console.log('文档保存成功:', response)
 						store.commit('setUserText', {
 							fileId: currentFileId.value,
 							text: value
@@ -389,7 +389,7 @@ onMounted(() => {
 						currentFileContent.value = value
 					},
 					error: function (error) {
-						console.error('文件保存失败:', error)
+						console.error('文档保存失败:', error)
 					}
 				})
 			}
@@ -413,12 +413,12 @@ const acceptChanges = () => {
 			fileContent: currentFileContent.value
 		}),
 		success: function (response) {
-			console.log('文件保存成功:', response)
+			console.log('文档保存成功:', response)
 			store.commit('setUserText', { fileId: currentFileId.value, text: currentFileContent.value })
 			confirmDialogVisible.value = false
 		},
 		error: function (error) {
-			console.error('文件保存失败:', error)
+			console.error('文档保存失败:', error)
 		}
 	})
 	store.commit('setShouldUpdateUserText', false)
@@ -473,14 +473,14 @@ const handleSonThingUpdate = () => {
 					fileContent: currentFileContent.value
 				}),
 				success: function (response) {
-					console.log('文件保存成功:', response)
+					console.log('文档保存成功:', response)
 					store.commit('setUserText', {
 						fileId: currentFileId.value,
 						text: currentFileContent.value
 					})
 				},
 				error: function (error) {
-					console.error('文件保存失败:', error)
+					console.error('文档保存失败:', error)
 				}
 			})
 			store.commit('setShouldUpdateUserText', false)
@@ -503,7 +503,7 @@ const handleSonThingUpdate = () => {
 					fileContent: currentFileContent.value
 				}),
 				success: function (response) {
-					console.log('文件保存成功:', response)
+					console.log('文档保存成功:', response)
 					store.commit('setUserText', {
 						fileId: currentFileId.value,
 						text: currentFileContent.value
@@ -511,7 +511,7 @@ const handleSonThingUpdate = () => {
 					confirmDialogVisible.value = false
 				},
 				error: function (error) {
-					console.error('文件保存失败:', error)
+					console.error('文档保存失败:', error)
 				}
 			})
 			store.commit('setShouldUpdateUserText', false)
@@ -527,7 +527,7 @@ const handleSonThingUpdate = () => {
 // 监控 currentFileId 的变化
 watch(currentFileId, (newFileId, oldFileId) => {
 	if (newFileId !== oldFileId) {
-		selectFile(newFileId) // 当 currentFileId 变化时，自动加载新文件
+		selectFile(newFileId) // 当 currentFileId 变化时，自动加载新文档
 	}
 })
 

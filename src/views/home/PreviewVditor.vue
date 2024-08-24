@@ -20,6 +20,8 @@
 					color: #333;
 					border: none;
 					box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+					cursor: pointer;
+					height: 30px;
 				"
 			>
 				返回
@@ -79,11 +81,11 @@ const fetchFileContent = () => {
 					vditor.value.setValue(currentFileContent.value)
 				}
 			} else {
-				console.error('获取文件内容时出错:', response.message)
+				console.error('获取文档内容时出错:', response.message)
 			}
 		},
 		error: function (error) {
-			console.error('获取文件内容失败:', error)
+			console.error('获取文档内容失败:', error)
 		}
 	})
 }
