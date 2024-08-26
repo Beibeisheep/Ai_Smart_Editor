@@ -168,7 +168,7 @@ export default defineComponent({
 				return
 			}
 			$.ajax({
-				url: 'http://192.168.1.5:8083/TextEditor/file/listFileByName',
+				url: 'http://localhost:8083/TextEditor/file/listFileByName',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify(searchQuery.value.trim()), // 传递搜索参数
@@ -192,7 +192,7 @@ export default defineComponent({
 
 		const addNewItem = () => {
 			$.ajax({
-				url: 'http://192.168.1.5:8083/TextEditor/file/createFile',
+				url: 'http://localhost:8083/TextEditor/file/createFile',
 				type: 'POST',
 				success: function (response) {
 					console.log('文档创建成功:', response)
@@ -209,7 +209,7 @@ export default defineComponent({
 		// 获取数据
 		const fetchData = () => {
 			$.ajax({
-				url: 'http://192.168.1.5:8083/TextEditor/file/listFiles',
+				url: 'http://localhost:8083/TextEditor/file/listFiles',
 				type: 'POST',
 				dataType: 'json',
 				success: (response) => {
@@ -265,7 +265,7 @@ export default defineComponent({
 			}
 
 			$.ajax({
-				url: 'http://192.168.1.5:8083/TextEditor/file/updateFileName',
+				url: 'http://localhost:8083/TextEditor/file/updateFileName',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify({
@@ -302,7 +302,7 @@ export default defineComponent({
 			}
 
 			$.ajax({
-				url: 'http://192.168.1.5:8083/TextEditor/file/removeFile',
+				url: 'http://localhost:8083/TextEditor/file/removeFile',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify(selectedKeys.value),
@@ -333,7 +333,7 @@ export default defineComponent({
 			store.commit('setSelectedItemKey', row.fileId)
 			router.push('/home/edit')
 			// $.ajax({
-			// 	url: 'http://192.168.1.5:8083/TextEditor/file/getFileInfo',
+			// 	url: 'http://localhost:8083/TextEditor/file/getFileInfo',
 			// 	type: 'POST',
 			// 	contentType: 'application/json',
 			// 	data: JSON.stringify(row.fileId),

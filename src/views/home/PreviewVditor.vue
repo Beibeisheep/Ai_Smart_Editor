@@ -28,9 +28,9 @@
 			</n-button>
 		</n-space>
 		<n-space style="margin-left: auto">
-			<router-link to="/contact-us">
+			<!-- <router-link to="/contact-us">
 				<n-button text style="color: white; margin-right: 30px"> 联系我们 </n-button>
-			</router-link>
+			</router-link> -->
 			<n-button text style="color: white; padding-right: 20px"
 				>用户名: {{ $store.state.user.email }}</n-button
 			>
@@ -70,7 +70,7 @@ const goHome = () => {
 }
 const fetchFileContent = () => {
 	$.ajax({
-		url: 'http://192.168.1.5:8083/TextEditor/file/getFileInfo',
+		url: 'http://localhost:8083/TextEditor/file/getFileInfo',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify(currentFileId.value),

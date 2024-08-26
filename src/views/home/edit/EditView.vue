@@ -220,7 +220,7 @@ const goHome = () => {
 
 const addNewItem = () => {
 	$.ajax({
-		url: 'http://192.168.1.5:8083/TextEditor/file/createFile',
+		url: 'http://localhost:8083/TextEditor/file/createFile',
 		// url: 'http://10.6.3.167:8083/TextEditor/user/createFile',
 		type: 'POST',
 		success: function (response) {
@@ -237,7 +237,7 @@ const addNewItem = () => {
 
 const fetchFileList = () => {
 	$.ajax({
-		url: 'http://192.168.1.5:8083/TextEditor/file/listFiles',
+		url: 'http://localhost:8083/TextEditor/file/listFiles',
 		type: 'POST',
 		dataType: 'json',
 		success: (response) => {
@@ -267,7 +267,7 @@ const selectFile = (fileId) => {
 	store.commit('setSelectedItemKey', fileId) // 更新 Vuex 中的
 	console.log('fileIdddddddddddddddddddddddddd', currentFileId.value)
 	$.ajax({
-		url: 'http://192.168.1.5:8083/TextEditor/file/getFileInfo',
+		url: 'http://localhost:8083/TextEditor/file/getFileInfo',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify(currentFileId.value),
@@ -295,7 +295,7 @@ const searchFiles = () => {
 	console.log('FIleName', searchQuery.value)
 	console.log('searchQuery.value.trim()', searchQuery.value.trim())
 	$.ajax({
-		url: 'http://192.168.1.5:8083/TextEditor/file/listFileByName',
+		url: 'http://localhost:8083/TextEditor/file/listFileByName',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify(searchQuery.value.trim()), // 传递搜索参数
@@ -330,7 +330,7 @@ const handleRenameConfirm = () => {
 	}
 	console.log('renameDialogVisible.valuuuuuuuuuuuuuuuuuuuuuuue', renameDialogVisible.value)
 	$.ajax({
-		url: 'http://192.168.1.5:8083/TextEditor/file/updateFileName',
+		url: 'http://localhost:8083/TextEditor/file/updateFileName',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify({
@@ -373,7 +373,7 @@ onMounted(() => {
 			// 使用 `input` 回调函数监听内容变化
 			if (currentFileId.value) {
 				$.ajax({
-					url: 'http://192.168.1.5:8083/TextEditor/file/saveFile',
+					url: 'http://localhost:8083/TextEditor/file/saveFile',
 					type: 'POST',
 					contentType: 'application/json',
 					data: JSON.stringify({
@@ -405,7 +405,7 @@ const acceptChanges = () => {
 	currentFileContent.value = newFileContent.value // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
 	vditor.value.setValue(currentFileContent.value, false) // 更新 Vditor 中的内容
 	$.ajax({
-		url: 'http://192.168.1.5:8083/TextEditor/file/saveFile',
+		url: 'http://localhost:8083/TextEditor/file/saveFile',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify({
@@ -465,7 +465,7 @@ const handleSonThingUpdate = () => {
 
 			vditor.value.setValue(currentFileContent.value, false) // 更新 Vditor 中的内容
 			$.ajax({
-				url: 'http://192.168.1.5:8083/TextEditor/file/saveFile',
+				url: 'http://localhost:8083/TextEditor/file/saveFile',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify({
@@ -495,7 +495,7 @@ const handleSonThingUpdate = () => {
 			currentFileContent.value = newFileContent.value // 将 newFileContent(Ai改过的) 的值赋值给 currentFileContent（展示的？）
 			vditor.value.setValue(currentFileContent.value, false) // 更新 Vditor 中的内容
 			$.ajax({
-				url: 'http://192.168.1.5:8083/TextEditor/file/saveFile',
+				url: 'http://localhost:8083/TextEditor/file/saveFile',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify({

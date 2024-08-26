@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div>
-			<!-- 点击展示客服弹窗 -->
+			<!-- 点击展示助手弹窗 -->
 			<div class="service" @click="showOptions">
 				<svg
 					t="1686814946576"
@@ -49,7 +49,7 @@
 					</div>
 					<div class="modal-body">
 						<div class="option-list">
-							<div class="option-item" @click="openAiCustomerService">AI 客服</div>
+							<div class="option-item" @click="openAiCustomerService">AI 助手</div>
 							<div class="option-item" @click.stop="handleOneKeyContinuation">AI续写</div>
 							<!-- <div class="option-item" @click.stop="handleOneKeyTypesetting">一键排版</div> -->
 							<div class="option-item" @click.stop="selectTypesettingFormat">一键排版</div>
@@ -74,10 +74,10 @@
 			</div>
 
 
-			<!-- AI 客服聊天界面 -->
+			<!-- AI 助手聊天界面 -->
 			<div v-if="showChat" class="chat-modal">
 				<div class="modal-header">
-					<span class="modal-title">AI 客服</span>
+					<span class="modal-title">AI 助手</span>
 					<span class="close-btn" @click="closeChat">×</span>
 				</div>
 				<div class="modal-body">
@@ -208,11 +208,11 @@ const showOptions = () => {
 	console.log('打开选择弹窗cccccccccccccc')
 }
 
-// 打开 AI 客服
+// 打开 AI 助手
 const openAiCustomerService = () => {
 	showOptionsModal.value = false
 	console.log('关闭选择弹窗发；；；；；；；；；；；；；；；')
-	console.log('打开AI客服fffffffffffffffff')
+	console.log('打开AI助手fffffffffffffffff')
 	showChat.value = true
 }
 
@@ -221,7 +221,7 @@ const closeChat = () => {
 	showChat.value = false
 }
 
-// 发送消息到 AI 客服
+// 发送消息到 AI 助手
 const sendMessage = async () => {
 	// 检查用户输入是否为空
 	if (!userInput.value.trim()) return
@@ -252,7 +252,7 @@ const sendMessage = async () => {
 
 	// 创建请求数据
 	const data = {
-		model: 'gpt-3.5-turbo-instruct',
+		model: 'gpt-3.5-turbo-16k',
 		messages: [
 			{
 				role: 'system',
@@ -316,7 +316,7 @@ const AiTypesetting = async (format) => { // 添加 format 参数
 
 	// 创建请求数据
 	const data2 = {
-		model: 'gpt-4-32k-0314',
+		model: 'gpt-4-turbo-2024-04-09',
 		messages: [
 			{
 				role: 'system',
@@ -330,7 +330,7 @@ const AiTypesetting = async (format) => { // 添加 format 参数
 		],
 		top_p: 1,
 		// prompt: userText.value,
-		max_tokens: 1000000,
+		// max_tokens: ,
 		temperature: 0.6
 	}
 
@@ -381,7 +381,7 @@ const AiCorrection = async () => {
 
 	// 创建请求数据
 	const data3 = {
-		model: 'gpt-3.5-turbo-16k-0613',
+		model: 'gpt-3.5-turbo-16k',
 		messages: [
 			{
 				role: 'system',
