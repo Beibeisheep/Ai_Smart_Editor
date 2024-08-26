@@ -70,7 +70,7 @@ const goHome = () => {
 }
 const fetchFileContent = () => {
 	$.ajax({
-		url: 'http://192.168.0.129:8083/TextEditor/file/getFileInfo',
+		url: 'http://192.168.1.5:8083/TextEditor/file/getFileInfo',
 		type: 'POST',
 		contentType: 'application/json',
 		data: JSON.stringify(currentFileId.value),

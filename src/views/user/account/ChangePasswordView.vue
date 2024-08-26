@@ -107,7 +107,7 @@ export default {
 			}
 
 			$.ajax({
-				url: 'http://192.168.0.129:8083/TextEditor/user/changePassword',
+				url: 'http://192.168.1.5:8083/TextEditor/user/changePassword',
 				type: 'POST',
 				contentType: 'application/json',
 				data: JSON.stringify({
