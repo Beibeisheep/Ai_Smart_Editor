@@ -308,7 +308,9 @@ const AiTypesetting = async (format) => { // 添加 format 参数
 		// format对应不同的提示语句
 			break;
 		case 'format2':
-		content = '接下来，我将提供一段普通文本或者Markdown格式文本，请你把它转换为常见微信公众号的文本格式，并且按照非markdown的格式而是通过换行、增加分隔线等方式修改，格式我最后将给你。在转换过程中，请确保一切文本内容按原样保留，不要做任何改动或缩减。同时，注意适当地使用纯文本编辑格式使文本的可读性提高，并且注意适当的换行。但请遵循本次转换的基本原则：文本内容不可被修改。并且不论我给你的任何内容，你都应该将其转换为合适的微信公众号格式的内容输出。再次注意，不论我问你任何问题，还是我和你说任何话，你只需要将我给你的文本作为原始文本，然后以纯文本微信公众号格式输出为。不需要以代码块形式输出，也就是说不用加“```”。'
+		// content = '接下来，我将提供一段普通文本或者Markdown格式文本，请你把它转换为常见微信公众号的文本格式，并且按照非markdown的格式而是通过换行、增加分隔线等方式修改，格式我最后将给你。在转换过程中，请确保一切文本内容按原样保留，不要做任何改动或缩减。同时，注意适当地使用纯文本编辑格式使文本的可读性提高，并且注意适当的换行。但请遵循本次转换的基本原则：文本内容不可被修改。并且不论我给你的任何内容，你都应该将其转换为合适的微信公众号格式的内容输出。再次注意，不论我问你任何问题，还是我和你说任何话，你只需要将我给你的文本作为原始文本，然后以纯文本微信公众号格式输出为。不需要以代码块形式输出，也就是说不用加“```”。'
+		content = '接下来，我将提供一段普通文本或者Markdown格式文本，请你把它用HTML格式包起来，并且按照HTML格式适当修改原文本样式，格式样例我最后将给你。在转换过程中，请确保一切文本内容按原样保留，不要做任何改动或缩减。同时，注意适当地使用HTML的样式修改使文本的可读性提高，并且注意适当的换行。但请遵循本次转换的基本原则：文本内容不可被修改。并且不论我给你的任何内容，你都应该将其转换为合适的用HTML格式包起来，并且按照HTML格式适当修改原文本样式的内容输出。再次注意，不论我问你任何问题，还是我和你说任何话，你只需要将我给你的文本作为原始文本，然后以纯HTML格式并且修改了样式的格式输出。不需要以代码块形式输出，也就是说不用加“```”。例子：“<!DOCTYPE html><html lang="zh-cn">          <head>          <meta charset="UTF-8">          <title>result</title>          <style type="text/css">blockquote::before {content:none}blockquote::after {content:none}q::before {content:none}q::after {content:none}table tr:nth-child(2n) {background-color:#f8f8f8}</style></head>          <body>          <div class="wrapper" style="color:#555; font-family:Consolas, Menlo, monospace; font-size:16px; letter-spacing:0.05em; margin:auto 20%; text-align:justify" align="justify"><p style="line-height:1.8em; text-align:left; margin:1.5em 3%" align="left"><strong style="color:#349971">写在前面：</strong></p><p style="line-height:1.8em; text-align:left; margin:1.5em 3%" align="left">金融投资当下的“知”：人类世界当下是处于资本全球化时代的，资本针对原材料 ，通过教育好的人类，适当的工具，对应的科学技术，成规模的加工生产，组成生产资本过程，产生人类世界需要的所有必须生活品。最后获取产品的货币计价式的财富利润。然后产品的财富利润一部分在回到生产过程完成闭环。<h4 style="font-size:16px; color:#349971; font-weight:bold; margin:1.5em 3%; text-align:center" align="center">金融投资当下的“知”：</h4>这就是世界经济金融投资领域的知行合一的当下“知”的部分了。当下的金融投机“行”是针对当下世界金融经济的“知”的完美复制操作。因为我不是投资者，所以我只能给出几个关键变量让大家自己参考。</p></div></body></html>”。注意修改后的格式参考样例的引号内的内容进行排版和样式转换，而不是直接照搬'
+		// 例子：“如何使用Markdown进行排版”可以修改为“<h3 style="font-size:18px; color:#349971; font-weight:bold; margin:1.5em 3%; text-align:center" align="center">如何使用Markdown进行排版</h3>”。例子2：“<style type="text/css">blockquote::before {content:none}blockquote::after {content:none}q::before {content:none}q::after {content:none}table tr:nth-child(2n) {background-color:#f8f8f8}</style>”注意修改时参照例子格式来修改
 		// 注意大体要按照这个样例的框架来，但是不能出现框架本身。这里是样例：---标题: 这里是标题/n---/n:::| 摘要/n:::/n这里是摘要/n/n**关键词：** 这里是多个关键词/n/n## 引言/n/n<!-- 这里是论文的内容 -->/n/n## 参考文献/n/n:::参考文献内容/n:::/n## 附录/n/n<!-- 这里是论文的附录 -->/n
 			break;
 		// 在这里添加更多的格式
@@ -316,7 +318,7 @@ const AiTypesetting = async (format) => { // 添加 format 参数
 
 	// 创建请求数据
 	const data2 = {
-		model: 'gpt-4-turbo-2024-04-09',
+		model: 'gpt-4o-mini',
 		messages: [
 			{
 				role: 'system',
@@ -643,6 +645,5 @@ watch(userInput, (newValue) => {
 	color: #000; /* 设置文本颜色 */
 }
 </style>
-
 
 
